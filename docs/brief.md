@@ -272,10 +272,10 @@ The MVP establishes the core value proposition and validates that users find the
 ### Technology Preferences
 
 - **Frontend:**
-  - React.js or Vue.js for component-based UI development
-  - TypeScript for type safety and better developer experience
-  - Modern CSS framework (Tailwind CSS, Material-UI, or styled-components)
-  - Chart.js, D3.js, or Recharts for data visualization
+  - Angular 17+ for component-based UI development
+  - TypeScript for strong typing and better maintainability
+  - Modern CSS framework (Tailwind CSS or Angular Material)
+  - Chart.js or ngx-charts for data visualization
 
 - **Backend:**
   - Java 21 (LTS) with Spring Boot for API development
