@@ -278,9 +278,11 @@ The MVP establishes the core value proposition and validates that users find the
   - Chart.js, D3.js, or Recharts for data visualization
 
 - **Backend:**
-  - Node.js with Express or Nest.js for API development
-  - RESTful API architecture (GraphQL as potential future enhancement)
-  - TypeScript for consistency with frontend
+  - Java 21 (LTS) with Spring Boot for API development
+  - Hibernate ORM for data persistence and entity mapping
+  - RESTful API architecture following layered structure (Controller, Service, Repository)
+  - Gradle for build automation and dependency management
+  - JUnit and Mockito for unit and integration testing
 
 - **Database:**
   - PostgreSQL for relational data (transactions, users, categories)
