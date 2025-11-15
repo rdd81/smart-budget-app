@@ -1,0 +1,30 @@
+version: '3.8'
+
+# Development mode overrides for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Frontend with hot-reload support
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4200:4200"
+    volumes:
+      # Mount source code for hot-reload
+      - ./frontend/src:/app/src:ro
+      - ./frontend/angular.json:/app/angular.json:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json:ro
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  # Backend with Spring DevTools hot-reload support (optional)
+  backend:
+    volumes:
+      # Mount source code for Spring DevTools hot-reload
+      - ./backend/src:/app/src:ro
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true

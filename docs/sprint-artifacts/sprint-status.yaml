@@ -43,7 +43,7 @@ development_status:
   # Epic 1: Foundation & Core Infrastructure (9 stories)
   epic-1: contexted
   1-1-project-initialization-and-repository-structure: review
-  1-2-docker-containerization-and-local-development-environment: backlog
+  1-2-docker-containerization-and-local-development-environment: review
   1-3-database-schema-and-migration-framework: backlog
   1-4-ci-cd-pipeline-setup: backlog
   1-5-user-registration-backend-api: backlog

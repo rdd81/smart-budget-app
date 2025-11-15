@@ -23,8 +23,10 @@ A modern personal finance management application that helps users track income a
 - **JUnit 5 + Mockito** - Testing framework
 
 ### Infrastructure
-- **PostgreSQL 15+** - Relational database (to be configured in Story 1.3)
-- **Docker 24+** - Containerization (to be configured in Story 1.2)
+- **PostgreSQL 15** - Relational database (Alpine Docker image)
+- **Docker 24+** - Containerization with multi-stage builds
+- **Docker Compose** - Service orchestration
+- **NGINX** - Web server and reverse proxy
 - **GitHub Actions** - CI/CD pipeline (to be configured in Story 1.4)
 
 ## Prerequisites
@@ -67,7 +69,9 @@ smart-budget-app/
 │   │   └── environments/ # Environment-specific configurations
 │   ├── package.json      # npm dependencies
 │   ├── tsconfig.json     # TypeScript configuration (strict mode)
-│   └── angular.json      # Angular CLI configuration
+│   ├── angular.json      # Angular CLI configuration
+│   ├── Dockerfile        # Production Docker image (multi-stage build)
+│   └── Dockerfile.dev    # Development Docker image (hot-reload)
 │
 ├── backend/               # Spring Boot 3.4 application
 │   ├── src/
@@ -77,13 +81,17 @@ smart-budget-app/
 │   │   └── test/java/    # Test source code
 │   ├── build.gradle      # Gradle build configuration
 │   ├── gradlew           # Gradle wrapper (Unix/Mac)
-│   └── gradlew.bat       # Gradle wrapper (Windows)
+│   ├── gradlew.bat       # Gradle wrapper (Windows)
+│   └── Dockerfile        # Production Docker image (multi-stage build)
 │
 ├── docs/                  # Project documentation
 │   ├── prd/              # Product requirements documents
 │   ├── architecture/     # Architecture specifications
 │   └── sprint-artifacts/ # User stories and tech specs
 │
+├── docker-compose.yml     # Docker orchestration (production mode)
+├── docker-compose.dev.yml # Docker orchestration (development mode)
+├── nginx.conf            # NGINX configuration for frontend
 ├── .gitignore            # Git ignore patterns
 └── README.md             # This file
 ```
@@ -123,6 +131,137 @@ The Spring Boot application will start on **http://localhost:8080**
 
 - **Frontend:** http://localhost:4200
 - **Backend API:** http://localhost:8080
+
+## Running with Docker
+
+The application is fully containerized with Docker, allowing you to run the entire stack (frontend, backend, and database) with a single command.
+
+### Prerequisites
+
+- **Docker 24+** - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- **Docker Compose** - Included with Docker Desktop
+
+### Production Mode
+
+Run the complete application stack in production mode:
+
+```bash
+# Start all services (frontend, backend, database)
+docker-compose up
+
+# Start in detached mode (background)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Stop and remove all volumes (clean restart)
+docker-compose down -v
+```
+
+**Access the application:**
+- **Frontend:** http://localhost:4200
+- **Backend API:** http://localhost:8080
+- **PostgreSQL:** localhost:5432 (database: smartbudget, user: postgres, password: postgres)
+
+### Development Mode (Hot-Reload)
+
+Run the application with hot-reload support for rapid development:
+
+```bash
+# Start in development mode with hot-reload
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+# Start in detached mode
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+**Development mode features:**
+- Frontend hot-reload: Changes to `frontend/src` are automatically reflected
+- Backend hot-reload: Spring DevTools enabled for automatic restarts
+- Source code mounted as volumes for live updates
+
+### Docker Services
+
+The application stack consists of three services:
+
+1. **postgres** - PostgreSQL 15 Alpine database
+   - Port: 5432
+   - Data persistence via Docker volume `postgres_data`
+   - Health checks enabled
+
+2. **backend** - Spring Boot 3.4.1 application
+   - Port: 8080
+   - Multi-stage build (Gradle build → JRE runtime)
+   - Depends on postgres service
+   - Health checks via Spring Actuator
+
+3. **frontend** - Angular 20.3.0 application
+   - Port: 4200 (mapped from container port 80)
+   - Multi-stage build (npm build → NGINX serving)
+   - Proxies /api requests to backend
+   - NGINX with gzip compression
+
+### Common Docker Commands
+
+```bash
+# Rebuild images (after Dockerfile changes)
+docker-compose build
+
+# Rebuild without using cache
+docker-compose build --no-cache
+
+# View running containers
+docker-compose ps
+
+# View logs for specific service
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f postgres
+
+# Execute command in running container
+docker-compose exec backend sh
+docker-compose exec frontend sh
+docker-compose exec postgres psql -U postgres -d smartbudget
+
+# Stop specific service
+docker-compose stop backend
+
+# Restart specific service
+docker-compose restart backend
+
+# Remove all containers and networks
+docker-compose down
+
+# Remove all containers, networks, and volumes
+docker-compose down -v
+```
+
+### Troubleshooting Docker
+
+**Port conflicts:**
+```bash
+# Check what's using a port (Windows)
+netstat -ano | findstr :8080
+taskkill /F /PID <pid>
+
+# Check what's using a port (Unix/Mac/Linux)
+lsof -i :8080
+kill -9 <pid>
+```
+
+**Database connection issues:**
+- Ensure postgres service is healthy: `docker-compose ps`
+- Check backend logs: `docker-compose logs backend`
+- Verify database credentials in docker-compose.yml
+
+**Build failures:**
+- Clean build: `docker-compose build --no-cache`
+- Remove old images: `docker image prune -a`
+- Check Docker disk space: `docker system df`
 
 ## Running Tests
 
@@ -190,9 +329,9 @@ JAR file will be created in `backend/build/libs/`
 
 **Completed Stories:**
 - ✅ Story 1.1: Project Initialization and Repository Structure
+- ✅ Story 1.2: Docker Containerization and Local Development Environment
 
 **Upcoming Stories:**
-- Story 1.2: Docker Containerization and Local Development Environment
 - Story 1.3: Database Schema and Migration Framework
 - Story 1.4: CI/CD Pipeline Setup
 - Story 1.5-1.9: User Authentication and Profile Management
