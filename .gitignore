@@ -1,0 +1,116 @@
+# Claude AI settings
+.claude/settings.local.json
+
+# ====================================
+# Node.js / Angular Frontend
+# ====================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+.angular/
+.cache/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# IDE - WebStorm
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# ====================================
+# Java / Spring Boot Backend
+# ====================================
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Maven (if used)
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Compiled class files
+*.class
+*.jar
+*.war
+*.ear
+
+# Package Files
+*.nar
+
+# JVM Crash Logs
+hs_err_pid*
+replay_pid*
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# IDE - NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# Spring Boot
+*.log
+spring-boot-devtools.properties
+
+# Application properties with secrets (keep templates)
+application-local.yml
+application-local.properties
+
+# ====================================
+# Docker
+# ====================================
+# None for now - will add docker-compose overrides later if needed
+
+# ====================================
+# BMAD Temporary Files
+# ====================================
+# Keep .bmad/ directory and workflows
+# Local workflow status tracking
+**/workflow-status.local.yaml
