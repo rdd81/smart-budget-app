@@ -32,6 +32,7 @@
     - [Story 1.6: User Login and JWT Authentication](./epic-1-foundation-core-infrastructure.md#story-16-user-login-and-jwt-authentication)
     - [Story 1.7: Frontend Authentication UI and State Management](./epic-1-foundation-core-infrastructure.md#story-17-frontend-authentication-ui-and-state-management)
     - [Story 1.8: Deployment Configuration and Documentation](./epic-1-foundation-core-infrastructure.md#story-18-deployment-configuration-and-documentation)
+    - [Story 1.9: User Profile Management](./epic-1-foundation-core-infrastructure.md#story-19-user-profile-management)
   - [Epic 2: Transaction Management](./epic-2-transaction-management.md)
     - [Story 2.1: Backend Transaction CRUD API](./epic-2-transaction-management.md#story-21-backend-transaction-crud-api)
     - [Story 2.2: Category Management API](./epic-2-transaction-management.md#story-22-category-management-api)

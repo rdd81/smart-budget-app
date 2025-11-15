@@ -160,3 +160,33 @@ so that the application can be deployed to a cloud environment and new team memb
 8. docs/architecture/source-tree.md created explaining repository structure and where to find key components
 9. Root README.md includes: project overview, prerequisites, local setup instructions, running tests, Docker commands, and links to detailed documentation
 10. BMAD standards checklist completed and documented in docs/
+
+## Story 1.9: User Profile Management
+
+As a registered user,
+I want to view and update my profile information including email and password,
+so that I can maintain accurate account details and change my credentials when needed for security.
+
+**Acceptance Criteria:**
+
+1. GET /api/users/profile endpoint created returning authenticated user's profile (id, email, createdAt, updatedAt)
+2. Endpoint secured with JWT authentication - users can only access their own profile
+3. PUT /api/users/profile/email endpoint created accepting new email with validation
+4. Email update validates uniqueness and returns 400 Bad Request if email already exists
+5. Email update requires valid email format validation
+6. PUT /api/users/profile/password endpoint created accepting currentPassword and newPassword
+7. Password update validates current password matches stored hash before allowing change
+8. New password validated for minimum 8 characters and hashed with bcrypt before storage
+9. Failed password verification returns 401 Unauthorized with "Current password is incorrect" message
+10. ProfileService created in backend with methods: getProfile(), updateEmail(), updatePassword()
+11. Frontend ProfileComponent created with route /profile (protected by auth guard)
+12. Profile page displays current email and account creation date in read-only fields
+13. "Change Email" section with form field for new email and submit button
+14. "Change Password" section with fields for current password, new password, and confirm new password
+15. Password change form validates new password matches confirmation field
+16. All form submissions show loading states and display success/error messages
+17. Successful email or password update shows success notification and refreshes displayed data
+18. Profile page follows Angular Material/Tailwind CSS styling consistent with rest of application
+19. Unit tests cover ProfileService logic for all update scenarios (success, validation failures, authorization)
+20. Integration tests validate end-to-end profile update flows including authentication and database persistence
+21. API endpoints documented with OpenAPI/Swagger annotations
