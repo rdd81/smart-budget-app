@@ -1,0 +1,420 @@
+<story-context id="smart-budget-app/story-1-1" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Project Initialization and Repository Structure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>C:\Projects\smart-budget-app\docs\sprint-artifacts\1-1-project-initialization-and-repository-structure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>the monorepo project structure initialized with both Angular and Spring Boot applications</iWant>
+    <soThat>the team has a consistent foundation to build features and can start development immediately</soThat>
+    <tasks>
+      <task id="1" acs="1,9">
+        <name>Initialize monorepo structure</name>
+        <subtasks>
+          <subtask>Create root project directory structure (frontend/, backend/, docs/)</subtask>
+          <subtask>Initialize Git repository with appropriate .gitignore for Node.js and Java</subtask>
+          <subtask>Create docs/ directory following BMAD standards</subtask>
+        </subtasks>
+      </task>
+      <task id="2" acs="2,8">
+        <name>Set up Angular frontend application</name>
+        <subtasks>
+          <subtask>Install Node.js 20 LTS and npm</subtask>
+          <subtask>Run Angular CLI: ng new smart-budget-app --directory=frontend --style=scss --routing=true</subtask>
+          <subtask>Enable TypeScript strict mode in tsconfig.json</subtask>
+          <subtask>Verify package.json includes Angular 17+ dependencies</subtask>
+          <subtask>Test: Run ng serve and verify app loads at http://localhost:4200</subtask>
+        </subtasks>
+      </task>
+      <task id="3" acs="3,7">
+        <name>Set up Spring Boot backend application</name>
+        <subtasks>
+          <subtask>Install Java 21 LTS (Amazon Corretto or OpenJDK)</subtask>
+          <subtask>Generate Spring Boot project using Spring Initializr with dependencies: Spring Web, Spring Data JPA, Spring Security, PostgreSQL Driver</subtask>
+          <subtask>Configure Gradle wrapper (gradlew, gradlew.bat)</subtask>
+          <subtask>Verify build.gradle includes Spring Boot 3.2+, Java 21, required dependencies</subtask>
+          <subtask>Test: Run ./gradlew bootRun and verify app starts on port 8080</subtask>
+        </subtasks>
+      </task>
+      <task id="4" acs="4">
+        <name>Create root-level README.md</name>
+        <subtasks>
+          <subtask>Document project overview and purpose</subtask>
+          <subtask>List complete technology stack (Angular 17+, Spring Boot 3.2+, PostgreSQL 15+, Docker)</subtask>
+          <subtask>Add prerequisites section (Java 21, Node 20, Docker 24+)</subtask>
+          <subtask>Include basic getting started instructions</subtask>
+          <subtask>Add project structure overview</subtask>
+        </subtasks>
+      </task>
+      <task id="5" acs="6">
+        <name>Verify independent application startup</name>
+        <subtasks>
+          <subtask>Start frontend with cd frontend &amp;&amp; npm start - verify http://localhost:4200</subtask>
+          <subtask>Start backend with cd backend &amp;&amp; ./gradlew bootRun - verify http://localhost:8080</subtask>
+          <subtask>Confirm no port conflicts or startup errors</subtask>
+        </subtasks>
+      </task>
+      <task id="6" acs="Testing validation">
+        <name>Write unit tests for initial setup</name>
+        <subtasks>
+          <subtask>Frontend: Verify Angular app component renders successfully</subtask>
+          <subtask>Backend: Verify Spring Boot application context loads successfully</subtask>
+          <subtask>Document test execution commands in README</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Monorepo directory structure created with frontend/ and backend/ subdirectories</criterion>
+    <criterion id="2">Angular 17+ application generated using Angular CLI in frontend/ directory with TypeScript strict mode enabled</criterion>
+    <criterion id="3">Spring Boot 3.x application generated (using Spring Initializr or Gradle init) in backend/ directory with Java 21, Spring Web, Spring Data JPA, Spring Security, and PostgreSQL dependencies</criterion>
+    <criterion id="4">Root-level README.md created with project overview, technology stack, and basic getting started instructions</criterion>
+    <criterion id="5">.gitignore configured for both Node.js and Java/Gradle artifacts</criterion>
+    <criterion id="6">Both frontend and backend applications can run independently (Angular dev server on port 4200, Spring Boot on port 8080)</criterion>
+    <criterion id="7">Gradle wrapper included in backend/ for consistent build experience</criterion>
+    <criterion id="8">npm/pnpm package.json includes Angular 17+ and required dependencies</criterion>
+    <criterion id="9">Basic folder structure follows BMAD standards with docs/ directory created</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <document path="docs/architecture.md" relevantSections="Repository Structure, Tech Stack, High-Level Architecture">
+        <summary>Defines monorepo structure (simple directory-based, no Nx/Turborepo), technology stack (Angular 17+, Spring Boot 3.2+, Java 21, Node 20), and layered architecture patterns</summary>
+        <keyPoints>
+          <point>Repository Structure: frontend/ (Angular 17+ standalone), backend/ (Spring Boot Java 21), docs/ (BMAD documentation)</point>
+          <point>No monorepo tooling required - simple directory structure</point>
+          <point>Tech Stack: Angular 17+ with TypeScript, Spring Boot 3.2+ with Java 21 LTS</point>
+          <point>Frontend: Component-based architecture, Angular Material + Tailwind CSS, Jasmine/Karma for testing</point>
+          <point>Backend: Layered architecture (Controller → Service → Repository), Spring Data JPA, JUnit 5/Mockito for testing</point>
+          <point>Build Tools: Angular CLI, Gradle 8+ with wrapper</point>
+          <point>Greenfield project - built from scratch using Angular CLI (ng new) and Spring Initializr</point>
+        </keyPoints>
+      </document>
+      <document path="docs/sprint-artifacts/tech-spec-epic-1.md" relevantSections="Frontend Dependencies, Backend Dependencies, System Architecture Alignment">
+        <summary>Detailed technical specification for Epic 1 including all dependencies, versions, and architectural components</summary>
+        <keyPoints>
+          <point>Frontend: Node.js 20 LTS, npm 10+, Angular 17+ (latest stable), Angular CLI 17+, TypeScript 5.2+ with strict mode</point>
+          <point>Backend: Java 21 LTS (Amazon Corretto or OpenJDK), Spring Boot 3.2+ (latest stable), Gradle 8.5+ (via wrapper)</point>
+          <point>Spring Boot dependencies: Spring Web, Spring Data JPA, Spring Security, PostgreSQL Driver, Flyway</point>
+          <point>Angular generated with: ng new --style=scss --routing=true</point>
+          <point>TypeScript strict mode required in tsconfig.json</point>
+          <point>Gradle wrapper must be included (gradlew, gradlew.bat)</point>
+          <point>Testing: Frontend (Jasmine/Karma, 60%+ coverage), Backend (JUnit 5/Mockito, 70%+ coverage)</point>
+        </keyPoints>
+      </document>
+      <document path="docs/prd/epic-1-foundation-core-infrastructure.md" relevantSections="Story 1.1 Acceptance Criteria">
+        <summary>Epic 1 breakdown including Story 1.1 acceptance criteria and epic goal</summary>
+        <keyPoints>
+          <point>Epic Goal: Establish complete technical foundation including project structure, development environment, containerization, CI/CD, database, and authentication</point>
+          <point>Story 1.1 Focus: Initialize monorepo with Angular 17+ frontend and Spring Boot 3.2+ backend for independent execution</point>
+          <point>Acceptance Criteria: 9 ACs covering directory structure, Angular setup, Spring Boot setup, README, .gitignore, independent startup, Gradle wrapper, package.json, BMAD standards</point>
+        </keyPoints>
+      </document>
+    </docs>
+    <code>
+      <existingCode>
+        <note>Greenfield project - no existing code. This is the first story in the epic and will create the initial project structure.</note>
+      </existingCode>
+      <interfacesToImplement>
+        <interface name="Angular DevServer">
+          <description>Angular development server must run on port 4200 and serve the default Angular application</description>
+          <location>frontend/</location>
+          <command>npm start or ng serve</command>
+        </interface>
+        <interface name="Spring Boot Application">
+          <description>Spring Boot application must start on port 8080 with embedded Tomcat</description>
+          <location>backend/</location>
+          <command>./gradlew bootRun</command>
+        </interface>
+      </interfacesToImplement>
+    </code>
+    <dependencies>
+      <frontend>
+        <runtime>
+          <dependency name="Node.js" version="20 LTS" purpose="JavaScript runtime for Angular development"/>
+          <dependency name="npm" version="10+" purpose="Package manager for Node.js dependencies"/>
+        </runtime>
+        <framework>
+          <dependency name="Angular" version="17+ (latest stable)" purpose="Frontend SPA framework"/>
+          <dependency name="Angular CLI" version="17+" purpose="Command-line tool for Angular project scaffolding and build"/>
+          <dependency name="TypeScript" version="5.2+" purpose="Type-safe JavaScript superset (strict mode enabled)"/>
+          <dependency name="RxJS" version="7.8+" purpose="Reactive programming library (included with Angular)"/>
+        </framework>
+        <buildTools>
+          <dependency name="Webpack" version="5+" purpose="Module bundler (bundled with Angular CLI)"/>
+        </buildTools>
+        <testing>
+          <dependency name="Jasmine" version="5.1+" purpose="Behavior-driven testing framework"/>
+          <dependency name="Karma" version="6.4+" purpose="Test runner for Angular"/>
+        </testing>
+        <packageManager>
+          <note>Use npm (not pnpm) for consistency. package.json will be auto-generated by Angular CLI with all required dependencies.</note>
+        </packageManager>
+      </frontend>
+      <backend>
+        <runtime>
+          <dependency name="Java" version="21 LTS" purpose="Java runtime (Amazon Corretto or OpenJDK)"/>
+        </runtime>
+        <framework>
+          <dependency name="Spring Boot" version="3.2+ (latest stable)" purpose="Backend application framework"/>
+          <dependency name="Spring Web" version="6.1+ (included)" purpose="REST API endpoints"/>
+          <dependency name="Spring Data JPA" version="3.2+" purpose="Data access abstraction"/>
+          <dependency name="Spring Security" version="6.2+" purpose="Authentication and authorization (required even if not configured yet)"/>
+          <dependency name="PostgreSQL JDBC Driver" version="42.7+" purpose="Database connectivity"/>
+          <dependency name="Hibernate ORM" version="6.4+ (included)" purpose="JPA implementation"/>
+        </framework>
+        <buildTools>
+          <dependency name="Gradle" version="8.5+" purpose="Build automation tool (via Gradle Wrapper)"/>
+          <dependency name="Gradle Wrapper" version="8.5+" purpose="Ensures consistent Gradle version across environments (gradlew, gradlew.bat)"/>
+        </buildTools>
+        <testing>
+          <dependency name="JUnit 5 (Jupiter)" version="5.10+" purpose="Unit testing framework"/>
+          <dependency name="Mockito" version="5.8+" purpose="Mocking framework"/>
+          <dependency name="Spring Boot Test" version="Included" purpose="Testing support for Spring components"/>
+        </testing>
+      </backend>
+      <versionControl>
+        <dependency name="Git" version="2.40+" purpose="Version control system"/>
+        <gitignore>
+          <frontend>
+            <pattern>node_modules/</pattern>
+            <pattern>dist/</pattern>
+            <pattern>.angular/</pattern>
+            <pattern>*.log</pattern>
+            <pattern>.env</pattern>
+          </frontend>
+          <backend>
+            <pattern>.gradle/</pattern>
+            <pattern>build/</pattern>
+            <pattern>*.jar</pattern>
+            <pattern>*.war</pattern>
+            <pattern>.idea/</pattern>
+            <pattern>*.class</pattern>
+          </backend>
+        </gitignore>
+      </versionControl>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <architectural>
+      <constraint type="Repository Structure">
+        <description>Simple directory-based monorepo with frontend/ and backend/ subdirectories - no Nx, Turborepo, or other monorepo tooling</description>
+        <rationale>Avoids complexity for small project scope, single CI/CD pipeline, developer convenience</rationale>
+        <source>docs/architecture.md#Repository-Structure</source>
+      </constraint>
+      <constraint type="TypeScript Configuration">
+        <description>TypeScript strict mode must be enabled in tsconfig.json</description>
+        <rationale>Enforces type safety, prevents common errors, improves code quality</rationale>
+        <source>docs/sprint-artifacts/tech-spec-epic-1.md#Frontend-Dependencies</source>
+      </constraint>
+      <constraint type="Layered Architecture">
+        <description>Backend must follow Controller → Service → Repository pattern</description>
+        <rationale>Promotes maintainability, testability, and separation of concerns</rationale>
+        <source>docs/architecture.md#Architectural-Patterns</source>
+      </constraint>
+      <constraint type="Documentation Standards">
+        <description>docs/ directory must follow BMAD standards with subdirectories for prd/, architecture/, sprint-artifacts/</description>
+        <rationale>Consistent documentation structure for AI-driven development</rationale>
+        <source>Story acceptance criteria AC 1.1-9</source>
+      </constraint>
+    </architectural>
+    <technical>
+      <constraint type="Port Configuration">
+        <description>Frontend dev server must run on port 4200, backend on port 8080</description>
+        <rationale>Standard development ports, avoid conflicts with other services</rationale>
+        <source>Story acceptance criteria AC 1.1-6</source>
+      </constraint>
+      <constraint type="Build Tools">
+        <description>Gradle wrapper (gradlew, gradlew.bat) must be included in backend/ directory</description>
+        <rationale>Ensures consistent Gradle version across all developer machines and CI/CD</rationale>
+        <source>Story acceptance criteria AC 1.1-7</source>
+      </constraint>
+      <constraint type="Independent Startup">
+        <description>Both applications must be able to run independently without requiring the other service</description>
+        <rationale>Enables parallel development, isolated testing, and debugging</rationale>
+        <source>Story acceptance criteria AC 1.1-6</source>
+      </constraint>
+    </technical>
+    <security>
+      <constraint type="Dependency Management">
+        <description>All dependencies must be from trusted sources: npm registry, Maven Central</description>
+        <rationale>Prevent supply chain attacks, ensure dependency integrity</rationale>
+        <source>docs/sprint-artifacts/tech-spec-epic-1.md#Security-Considerations-for-Dependencies</source>
+      </constraint>
+    </security>
+  </constraints>
+
+  <interfaces>
+    <internal>
+      <interface name="Angular Development Server">
+        <endpoint>http://localhost:4200</endpoint>
+        <protocol>HTTP</protocol>
+        <description>Serves Angular application during development with hot module replacement</description>
+        <startCommand>cd frontend &amp;&amp; npm start (or ng serve)</startCommand>
+      </interface>
+      <interface name="Spring Boot Embedded Tomcat">
+        <endpoint>http://localhost:8080</endpoint>
+        <protocol>HTTP</protocol>
+        <description>Spring Boot application with embedded Tomcat server</description>
+        <startCommand>cd backend &amp;&amp; ./gradlew bootRun</startCommand>
+      </interface>
+    </internal>
+    <external>
+      <note>No external integrations required for Story 1.1</note>
+    </external>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <frontend>
+        <framework>Jasmine + Karma</framework>
+        <coverageTarget>60% minimum line coverage</coverageTarget>
+        <testTypes>
+          <type name="Unit Tests">Test Angular components and services in isolation</type>
+          <type name="Component Tests">Test component rendering and user interactions</type>
+        </testTypes>
+        <testLocations>
+          <location>frontend/src/app/**/*.spec.ts</location>
+        </testLocations>
+        <executionCommand>npm test or ng test</executionCommand>
+        <ciCommand>npm run test:ci (headless mode for CI/CD)</ciCommand>
+      </frontend>
+      <backend>
+        <framework>JUnit 5 (Jupiter) + Mockito</framework>
+        <coverageTarget>70% minimum line coverage</coverageTarget>
+        <testTypes>
+          <type name="Unit Tests">Test service layer business logic with mocked repositories</type>
+          <type name="Integration Tests">Test Spring Boot application context loading</type>
+        </testTypes>
+        <testLocations>
+          <location>backend/src/test/java/**/*Test.java</location>
+        </testLocations>
+        <executionCommand>./gradlew test</executionCommand>
+        <ciCommand>./gradlew test (same for CI/CD)</ciCommand>
+      </backend>
+      <acceptanceTesting>
+        <criterion id="1">Manual verification of directory structure (frontend/, backend/, docs/)</criterion>
+        <criterion id="2">Integration test: ng serve runs successfully and serves default Angular app</criterion>
+        <criterion id="3">Integration test: ./gradlew bootRun starts Spring Boot successfully</criterion>
+        <criterion id="4">Manual review: README.md completeness and accuracy</criterion>
+        <criterion id="5">Unit test: Verify .gitignore excludes node_modules/, .gradle/, build/, dist/</criterion>
+        <criterion id="6">Integration test: Both servers start on correct ports without conflicts</criterion>
+        <criterion id="7">E2E test: ./gradlew build succeeds on fresh clone (validates wrapper)</criterion>
+        <criterion id="8">Unit test: Verify package.json lists Angular 17+ dependencies</criterion>
+        <criterion id="9">Manual verification: docs/ structure matches BMAD standards</criterion>
+      </acceptanceTesting>
+    </standards>
+    <locations>
+      <frontend>
+        <defaultTest>frontend/src/app/app.component.spec.ts</defaultTest>
+        <description>Default Angular app component test generated by CLI - verifies component renders</description>
+      </frontend>
+      <backend>
+        <contextLoadTest>backend/src/test/java/com/smartbudget/SmartBudgetApplicationTests.java</contextLoadTest>
+        <description>Default Spring Boot test - verifies application context loads successfully</description>
+      </backend>
+    </locations>
+    <ideas>
+      <frontend>
+        <idea priority="high">
+          <name>Angular App Component Rendering Test</name>
+          <description>Verify that the default Angular app component renders successfully with the title "smart-budget-app"</description>
+          <testType>Unit Test</testType>
+          <coverageAC>AC 1.1-2, AC 1.1-6</coverageAC>
+        </idea>
+        <idea priority="high">
+          <name>TypeScript Strict Mode Verification</name>
+          <description>Parse tsconfig.json and verify "strict": true is set</description>
+          <testType>Unit Test</testType>
+          <coverageAC>AC 1.1-2</coverageAC>
+        </idea>
+        <idea priority="medium">
+          <name>Package.json Dependencies Test</name>
+          <description>Verify package.json contains @angular/core version 17+ and required Angular dependencies</description>
+          <testType>Unit Test</testType>
+          <coverageAC>AC 1.1-8</coverageAC>
+        </idea>
+        <idea priority="medium">
+          <name>Dev Server Port Test</name>
+          <description>Start ng serve programmatically and verify server listens on port 4200</description>
+          <testType>Integration Test</testType>
+          <coverageAC>AC 1.1-6</coverageAC>
+        </idea>
+      </frontend>
+      <backend>
+        <idea priority="high">
+          <name>Spring Boot Application Context Load Test</name>
+          <description>Verify Spring Boot application context loads successfully without errors (default @SpringBootTest)</description>
+          <testType>Integration Test</testType>
+          <coverageAC>AC 1.1-3, AC 1.1-6</coverageAC>
+        </idea>
+        <idea priority="high">
+          <name>Build.gradle Dependencies Verification</name>
+          <description>Parse build.gradle and verify Spring Boot 3.2+, Java 21, Spring Web, Spring Data JPA, Spring Security, PostgreSQL dependencies are declared</description>
+          <testType>Unit Test</testType>
+          <coverageAC>AC 1.1-3</coverageAC>
+        </idea>
+        <idea priority="medium">
+          <name>Gradle Wrapper Verification</name>
+          <description>Verify gradlew and gradlew.bat exist and are executable, verify gradle-wrapper.properties specifies Gradle 8.5+</description>
+          <testType>Unit Test</testType>
+          <coverageAC>AC 1.1-7</coverageAC>
+        </idea>
+        <idea priority="medium">
+          <name>Application Port Configuration Test</name>
+          <description>Start Spring Boot application programmatically and verify embedded Tomcat listens on port 8080</description>
+          <testType>Integration Test</testType>
+          <coverageAC>AC 1.1-6</coverageAC>
+        </idea>
+      </backend>
+      <projectStructure>
+        <idea priority="high">
+          <name>Monorepo Directory Structure Test</name>
+          <description>Verify frontend/, backend/, and docs/ directories exist at project root</description>
+          <testType>Unit Test (Script)</testType>
+          <coverageAC>AC 1.1-1, AC 1.1-9</coverageAC>
+        </idea>
+        <idea priority="high">
+          <name>BMAD Documentation Structure Test</name>
+          <description>Verify docs/ contains subdirectories: prd/, architecture/, sprint-artifacts/</description>
+          <testType>Unit Test (Script)</testType>
+          <coverageAC>AC 1.1-9</coverageAC>
+        </idea>
+        <idea priority="medium">
+          <name>Gitignore Coverage Test</name>
+          <description>Verify .gitignore contains patterns for node_modules/, dist/, .gradle/, build/, *.jar, *.class</description>
+          <testType>Unit Test</testType>
+          <coverageAC>AC 1.1-5</coverageAC>
+        </idea>
+        <idea priority="low">
+          <name>README.md Completeness Test</name>
+          <description>Parse README.md and verify it contains sections: Overview, Tech Stack, Prerequisites, Getting Started</description>
+          <testType>Unit Test (Markdown parsing)</testType>
+          <coverageAC>AC 1.1-4</coverageAC>
+        </idea>
+      </projectStructure>
+      <endToEnd>
+        <idea priority="high">
+          <name>Independent Startup E2E Test</name>
+          <description>Start both frontend and backend servers concurrently and verify both respond on their respective ports (4200 and 8080) without errors</description>
+          <testType>E2E Test</testType>
+          <coverageAC>AC 1.1-6</coverageAC>
+        </idea>
+        <idea priority="medium">
+          <name>Fresh Clone Build Test</name>
+          <description>Simulate fresh git clone and verify ./gradlew build succeeds (tests Gradle wrapper functionality)</description>
+          <testType>E2E Test</testType>
+          <coverageAC>AC 1.1-7</coverageAC>
+        </idea>
+      </endToEnd>
+    </ideas>
+  </tests>
+</story-context>

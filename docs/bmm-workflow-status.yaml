@@ -38,4 +38,4 @@ workflow_status:
   solutioning-gate-check: docs/bmm-readiness-assessment-2025-11-15-revised.md  # agent: architect
 
   # Phase 3: Implementation
-  sprint-planning: required  # agent: sm
+  sprint-planning: docs/sprint-artifacts/sprint-status.yaml  # agent: sm
