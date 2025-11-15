@@ -1,5 +1,7 @@
 # Smart Budget App
 
+[![CI Pipeline](https://github.com/YOUR_USERNAME/smart-budget-app/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/smart-budget-app/actions/workflows/ci.yml)
+
 A modern personal finance management application that helps users track income and expenses, visualize spending patterns, and make informed financial decisions.
 
 ## Technology Stack
@@ -284,6 +286,43 @@ cd backend
 ```
 
 **Test Coverage Target:** 70% minimum line coverage
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration and deployment. Every push to `main` and all pull requests are automatically tested and validated.
+
+### Workflow Jobs
+
+1. **Frontend Tests** - Runs linting, unit tests, and generates coverage reports
+2. **Backend Tests** - Runs Gradle build, unit tests, integration tests with TestContainers, and generates coverage reports
+3. **Docker Build** - Validates that all Docker images build successfully
+4. **Build Artifacts** - Generates production-ready JAR and frontend dist files
+
+### Coverage Requirements
+
+- **Frontend:** Minimum 60% coverage (statements, branches, functions, lines)
+- **Backend:** Minimum 70% instruction coverage
+
+The build will fail if coverage thresholds are not met or if any tests fail.
+
+### Running Coverage Locally
+
+**Frontend:**
+```bash
+cd frontend
+npm run test -- --code-coverage --no-watch
+```
+
+**Backend:**
+```bash
+cd backend
+./gradlew test jacocoTestReport
+./gradlew jacocoTestCoverageVerification
+```
+
+Coverage reports:
+- Frontend: `frontend/coverage/index.html`
+- Backend: `backend/build/reports/jacoco/test/html/index.html`
 
 ## Build for Production
 

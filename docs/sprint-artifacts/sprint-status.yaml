@@ -45,7 +45,7 @@ development_status:
   1-1-project-initialization-and-repository-structure: review
   1-2-docker-containerization-and-local-development-environment: review
   1-3-database-schema-and-migration-framework: review
-  1-4-ci-cd-pipeline-setup: backlog
+  1-4-ci-cd-pipeline-setup: review
   1-5-user-registration-backend-api: backlog
   1-6-user-login-and-jwt-authentication: backlog
   1-7-frontend-authentication-ui-and-state-management: backlog
