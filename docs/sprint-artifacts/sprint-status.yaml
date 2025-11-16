@@ -48,7 +48,7 @@ development_status:
   1-4-ci-cd-pipeline-setup: review
   1-5-user-registration-backend-api: review
   1-6-user-login-and-jwt-authentication: review
-  1-7-frontend-authentication-ui-and-state-management: backlog
+  1-7-frontend-authentication-ui-and-state-management: review
   1-8-deployment-configuration-and-documentation: backlog
   1-9-user-profile-management: backlog
   epic-1-retrospective: optional

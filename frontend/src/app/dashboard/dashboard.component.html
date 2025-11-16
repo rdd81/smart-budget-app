@@ -1,0 +1,39 @@
+<div class="min-h-screen bg-gray-50">
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-semibold text-gray-900">Smart Budget</h1>
+        </div>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-700 mr-4" *ngIf="currentUser">
+            {{ currentUser.email }}
+          </span>
+          <button
+            (click)="onLogout()"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+          Welcome to Smart Budget!
+        </h2>
+        <p class="text-gray-600 mb-4" *ngIf="currentUser">
+          You are logged in as <strong>{{ currentUser.email }}</strong>
+        </p>
+        <p class="text-gray-600">
+          Your budget management dashboard will be available here soon.
+        </p>
+      </div>
+    </div>
+  </main>
+</div>
