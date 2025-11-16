@@ -84,6 +84,25 @@ describe('TransactionService', () => {
       req.flush(mockPage);
     });
 
+    it('should include filter query parameters', () => {
+      service.getTransactions({
+        dateFrom: '2025-01-01',
+        dateTo: '2025-01-31',
+        transactionType: TransactionType.INCOME,
+        categoryIds: ['cat-123', 'cat-999']
+      }).subscribe();
+
+      const req = httpMock.expectOne(request => {
+        return request.url === apiUrl &&
+               request.params.get('dateFrom') === '2025-01-01' &&
+               request.params.get('dateTo') === '2025-01-31' &&
+               request.params.getAll('categoryId')?.length === 2 &&
+               request.params.get('transactionType') === 'INCOME';
+      });
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPage);
+    });
+
     it('should handle empty response', () => {
       const emptyPage: Page<Transaction> = {
         content: [],

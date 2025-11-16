@@ -2,14 +2,14 @@ package com.smartbudget.repository;
 
 import com.smartbudget.entity.Transaction;
 import com.smartbudget.entity.TransactionType;
+import com.smartbudget.repository.projection.CategoryBreakdownView;
+import com.smartbudget.repository.projection.TransactionSummaryView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -80,34 +80,33 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             Pageable pageable);
 
     /**
-     * Get total income for a user within a date range.
-     *
-     * @param userId the user ID
-     * @param startDate the start date (inclusive)
-     * @param endDate the end date (inclusive)
-     * @return the total income amount
+     * Aggregated summary for income/expenses/count.
      */
-    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.id = :userId " +
-           "AND t.transactionType = 'INCOME' " +
-           "AND t.transactionDate BETWEEN :startDate AND :endDate")
-    java.math.BigDecimal getTotalIncomeByUserAndDateRange(
-            @Param("userId") UUID userId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate);
+    @Query("""
+            SELECT
+                COALESCE(SUM(CASE WHEN t.transactionType = com.smartbudget.entity.TransactionType.INCOME THEN t.amount ELSE 0 END), 0) AS income,
+                COALESCE(SUM(CASE WHEN t.transactionType = com.smartbudget.entity.TransactionType.EXPENSE THEN t.amount ELSE 0 END), 0) AS expenses,
+                COUNT(t) AS transactionCount
+            FROM Transaction t
+            WHERE t.user.id = :userId
+              AND t.transactionDate BETWEEN :startDate AND :endDate
+            """)
+    TransactionSummaryView summarizeTransactions(UUID userId, LocalDate startDate, LocalDate endDate);
 
     /**
-     * Get total expenses for a user within a date range.
-     *
-     * @param userId the user ID
-     * @param startDate the start date (inclusive)
-     * @param endDate the end date (inclusive)
-     * @return the total expense amount
+     * Aggregated totals per category and transaction type.
      */
-    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.id = :userId " +
-           "AND t.transactionType = 'EXPENSE' " +
-           "AND t.transactionDate BETWEEN :startDate AND :endDate")
-    java.math.BigDecimal getTotalExpensesByUserAndDateRange(
-            @Param("userId") UUID userId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate);
+    @Query("""
+            SELECT t.category.id AS categoryId,
+                   t.category.name AS categoryName,
+                   t.transactionType AS transactionType,
+                   SUM(t.amount) AS totalAmount,
+                   COUNT(t) AS transactionCount
+            FROM Transaction t
+            WHERE t.user.id = :userId
+              AND t.transactionDate BETWEEN :startDate AND :endDate
+            GROUP BY t.category.id, t.category.name, t.transactionType
+            ORDER BY totalAmount DESC
+            """)
+    List<CategoryBreakdownView> getCategoryBreakdown(UUID userId, LocalDate startDate, LocalDate endDate);
 }
