@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AnalyticsService } from './analytics.service';
 import { environment } from '../../environments/environment';
-import { CategoryBreakdownResponse, SummaryResponse } from '../models/analytics.model';
+import { CategoryBreakdownResponse, SummaryResponse, TrendDataPoint } from '../models/analytics.model';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
@@ -10,6 +10,7 @@ describe('AnalyticsService', () => {
 
   const apiUrl = `${environment.apiUrl}/analytics/summary`;
   const breakdownUrl = `${environment.apiUrl}/analytics/category-breakdown`;
+  const trendsUrl = `${environment.apiUrl}/analytics/trends`;
   const mockSummary: SummaryResponse = {
     totalIncome: 1000,
     totalExpenses: 400,
@@ -77,4 +78,27 @@ describe('AnalyticsService', () => {
     expect(req.request.method).toBe('GET');
     req.flush(mockBreakdown);
   });
+
+  it('should fetch trends with params', () => {
+    service.getTrends({ startDate: '2025-01-01', groupBy: 'WEEK' }).subscribe((data) => {
+      expect(data).toEqual(mockTrends);
+    });
+
+    const req = httpMock.expectOne(request =>
+      request.url === trendsUrl &&
+      request.params.get('startDate') === '2025-01-01' &&
+      request.params.get('groupBy') === 'WEEK'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockTrends);
+  });
 });
+  const mockTrends: TrendDataPoint[] = [
+    {
+      period: '2025-01-01',
+      totalIncome: 100,
+      totalExpenses: 50,
+      net: 50,
+      transactionCount: 2
+    }
+  ];

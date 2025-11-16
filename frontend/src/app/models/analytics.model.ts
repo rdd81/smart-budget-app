@@ -15,3 +15,11 @@ export interface CategoryBreakdownResponse {
   transactionCount: number;
   percentage: number;
 }
+
+export interface TrendDataPoint {
+  period: string;
+  totalIncome: number;
+  totalExpenses: number;
+  net: number;
+  transactionCount: number;
+}

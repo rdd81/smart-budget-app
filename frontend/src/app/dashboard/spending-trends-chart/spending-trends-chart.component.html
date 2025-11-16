@@ -1,0 +1,110 @@
+<section class="chart-card">
+  <header class="chart-header">
+    <div>
+      <h3>Income vs Expenses Over Time</h3>
+      <p>Track how your finances evolve for the selected date range.</p>
+    </div>
+    <div class="chart-controls">
+      <div class="toggle-group" role="group" aria-label="Chart type">
+        <button type="button" [class.active]="chartType === 'line'" (click)="setChartType('line')">Line</button>
+        <button type="button" [class.active]="chartType === 'bar'" (click)="setChartType('bar')">Bar</button>
+      </div>
+      <div class="toggle-group" role="group" aria-label="Grouping">
+        <button type="button" [class.active]="groupBy === 'DAY'" (click)="setGroupBy('DAY')">Day</button>
+        <button type="button" [class.active]="groupBy === 'WEEK'" (click)="setGroupBy('WEEK')">Week</button>
+        <button type="button" [class.active]="groupBy === 'MONTH'" (click)="setGroupBy('MONTH')">Month</button>
+      </div>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert error">
+    {{ error }}
+    <button class="ghost-button" (click)="fetchData()">Retry</button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading spending trends...</p>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="hasData; else emptyState">
+      <div class="chart-wrapper">
+        <svg [attr.viewBox]="'0 0 ' + viewBoxWidth + ' ' + viewBoxHeight" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="incomeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#34d399" stop-opacity="0.35"></stop>
+              <stop offset="100%" stop-color="#34d399" stop-opacity="0"></stop>
+            </linearGradient>
+            <linearGradient id="expenseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f87171" stop-opacity="0.35"></stop>
+              <stop offset="100%" stop-color="#f87171" stop-opacity="0"></stop>
+            </linearGradient>
+          </defs>
+
+          <g class="grid-lines">
+            <line *ngFor="let tick of [0, 0.25, 0.5, 0.75, 1]" [attr.y1]="scaleY(maxValue * tick)"
+                  [attr.y2]="scaleY(maxValue * tick)" x1="40" [attr.x2]="viewBoxWidth - 40"></line>
+          </g>
+
+          <path *ngIf="chartType === 'line'" class="income-line" [attr.d]="incomePath"></path>
+          <path *ngIf="chartType === 'line'" class="expense-line" [attr.d]="expensePath"></path>
+
+          <g *ngIf="chartType === 'line'">
+            <circle *ngFor="let point of points; let i = index" class="income-dot"
+                    [attr.cx]="scaleX(i)" [attr.cy]="scaleY(point.totalIncome)" r="3">
+              <title>{{ point.period | date: 'MMM d, y' }} - Income: {{ point.totalIncome | currency }}</title>
+            </circle>
+            <circle *ngFor="let point of points; let i = index" class="expense-dot"
+                    [attr.cx]="scaleX(i)" [attr.cy]="scaleY(point.totalExpenses)" r="3">
+              <title>{{ point.period | date: 'MMM d, y' }} - Expenses: {{ point.totalExpenses | currency }}</title>
+            </circle>
+          </g>
+
+          <g *ngIf="chartType === 'bar'">
+            <g *ngFor="let point of points; let i = index">
+              <rect class="income-bar"
+                    [attr.x]="scaleX(i) - 12"
+                    [attr.y]="scaleY(point.totalIncome)"
+                    width="10"
+                    [attr.height]="chartHeight - scaleY(point.totalIncome)">
+                <title>{{ point.period | date: 'MMM d, y' }} - Income: {{ point.totalIncome | currency }}</title>
+              </rect>
+              <rect class="expense-bar"
+                    [attr.x]="scaleX(i) + 2"
+                    [attr.y]="scaleY(point.totalExpenses)"
+                    width="10"
+                    [attr.height]="chartHeight - scaleY(point.totalExpenses)">
+                <title>{{ point.period | date: 'MMM d, y' }} - Expenses: {{ point.totalExpenses | currency }}</title>
+              </rect>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <ul class="legend">
+        <li>
+          <span class="legend-color income"></span>
+          <div>
+            <p>Income</p>
+            <small>Green line/bars</small>
+          </div>
+        </li>
+        <li>
+          <span class="legend-color expense"></span>
+          <div>
+            <p>Expenses</p>
+            <small>Red line/bars</small>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h4>No trend data available</h4>
+      <p>Add transactions to see how your spending changes over time.</p>
+    </div>
+  </ng-template>
+</section>
