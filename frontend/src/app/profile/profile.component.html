@@ -1,0 +1,253 @@
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <!-- Header -->
+      <div class="bg-indigo-600 px-6 py-4">
+        <h1 class="text-2xl font-bold text-white">User Profile</h1>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loadingProfile" class="p-6 text-center">
+        <svg class="animate-spin h-8 w-8 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-gray-600">Loading profile...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="profileError" class="p-6">
+        <div class="rounded-md bg-red-50 p-4" role="alert">
+          <div class="flex">
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">{{ profileError }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Content -->
+      <div *ngIf="user && !loadingProfile" class="p-6">
+        <!-- Account Information (Read-Only) -->
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h2>
+          <div class="bg-gray-50 rounded-md p-4 space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">User ID</label>
+              <p class="mt-1 text-sm text-gray-900">{{ user.id }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Email Address</label>
+              <p class="mt-1 text-sm text-gray-900">{{ user.email }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Account Created</label>
+              <p class="mt-1 text-sm text-gray-900">{{ formatDate(user.createdAt) }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Last Updated</label>
+              <p class="mt-1 text-sm text-gray-900">{{ formatDate(user.updatedAt) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Change Email Section -->
+        <div class="mb-8 border-t pt-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Change Email Address</h2>
+
+          <form [formGroup]="emailForm" (ngSubmit)="onUpdateEmail()" class="space-y-4">
+            <div>
+              <label for="newEmail" class="block text-sm font-medium text-gray-700 mb-1">
+                New Email Address
+              </label>
+              <input
+                id="newEmail"
+                name="newEmail"
+                type="email"
+                formControlName="newEmail"
+                autocomplete="email"
+                required
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="New email address"
+                [class.border-red-500]="newEmail.invalid && newEmail.touched"
+                aria-label="New email address"
+                aria-required="true"
+                [attr.aria-invalid]="newEmail.invalid && newEmail.touched"
+              />
+              <div *ngIf="newEmail.invalid && newEmail.touched" class="mt-1">
+                <p *ngIf="newEmail.errors?.['required']" class="text-sm text-red-600">
+                  Email is required
+                </p>
+                <p *ngIf="newEmail.errors?.['email']" class="text-sm text-red-600">
+                  Please enter a valid email address
+                </p>
+              </div>
+            </div>
+
+            <!-- Success Message -->
+            <div *ngIf="emailSuccess" class="rounded-md bg-green-50 p-4" role="alert">
+              <div class="flex">
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-green-800">{{ emailSuccess }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="emailError" class="rounded-md bg-red-50 p-4" role="alert">
+              <div class="flex">
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-red-800">{{ emailError }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                [disabled]="emailForm.invalid || loadingEmail"
+                class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                [attr.aria-busy]="loadingEmail"
+              >
+                <span *ngIf="!loadingEmail">Update Email</span>
+                <span *ngIf="loadingEmail" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Updating...
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="border-t pt-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="onUpdatePassword()" class="space-y-4">
+            <div>
+              <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                Current Password
+              </label>
+              <input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                formControlName="currentPassword"
+                autocomplete="current-password"
+                required
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Current password"
+                [class.border-red-500]="currentPassword.invalid && currentPassword.touched"
+                aria-label="Current password"
+                aria-required="true"
+                [attr.aria-invalid]="currentPassword.invalid && currentPassword.touched"
+              />
+              <div *ngIf="currentPassword.invalid && currentPassword.touched" class="mt-1">
+                <p *ngIf="currentPassword.errors?.['required']" class="text-sm text-red-600">
+                  Current password is required
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                New Password
+              </label>
+              <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                formControlName="newPassword"
+                autocomplete="new-password"
+                required
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="New password (minimum 8 characters)"
+                [class.border-red-500]="newPassword.invalid && newPassword.touched"
+                aria-label="New password"
+                aria-required="true"
+                [attr.aria-invalid]="newPassword.invalid && newPassword.touched"
+              />
+              <div *ngIf="newPassword.invalid && newPassword.touched" class="mt-1">
+                <p *ngIf="newPassword.errors?.['required']" class="text-sm text-red-600">
+                  New password is required
+                </p>
+                <p *ngIf="newPassword.errors?.['minlength']" class="text-sm text-red-600">
+                  Password must be at least 8 characters long
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                Confirm New Password
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+                required
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Confirm new password"
+                [class.border-red-500]="confirmPassword.invalid && confirmPassword.touched || passwordForm.errors?.['passwordMismatch'] && confirmPassword.touched"
+                aria-label="Confirm new password"
+                aria-required="true"
+                [attr.aria-invalid]="confirmPassword.invalid && confirmPassword.touched"
+              />
+              <div *ngIf="confirmPassword.invalid && confirmPassword.touched" class="mt-1">
+                <p *ngIf="confirmPassword.errors?.['required']" class="text-sm text-red-600">
+                  Please confirm your new password
+                </p>
+              </div>
+              <div *ngIf="passwordForm.errors?.['passwordMismatch'] && confirmPassword.touched" class="mt-1">
+                <p class="text-sm text-red-600">
+                  Passwords do not match
+                </p>
+              </div>
+            </div>
+
+            <!-- Success Message -->
+            <div *ngIf="passwordSuccess" class="rounded-md bg-green-50 p-4" role="alert">
+              <div class="flex">
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-green-800">{{ passwordSuccess }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="passwordError" class="rounded-md bg-red-50 p-4" role="alert">
+              <div class="flex">
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-red-800">{{ passwordError }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                [disabled]="passwordForm.invalid || loadingPassword"
+                class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                [attr.aria-busy]="loadingPassword"
+              >
+                <span *ngIf="!loadingPassword">Update Password</span>
+                <span *ngIf="loadingPassword" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Updating...
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

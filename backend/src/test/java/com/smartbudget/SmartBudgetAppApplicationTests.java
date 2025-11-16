@@ -1,7 +1,6 @@
 package com.smartbudget;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -11,7 +10,7 @@ import com.smartbudget.repository.UserRepository;
 
 import javax.sql.DataSource;
 
-@SpringBootTest(classes = SmartBudgetAppApplicationTests.TestApplication.class, properties = {
+@SpringBootTest(properties = {
 		"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
 				"org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration," +
 				"org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration," +
@@ -35,9 +34,5 @@ class SmartBudgetAppApplicationTests {
 
 	@Test
 	void contextLoads() {
-	}
-
-	@SpringBootApplication(scanBasePackages = "com.smartbudget.testplaceholder")
-	static class TestApplication {
 	}
 }
