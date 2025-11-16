@@ -1,0 +1,9 @@
+/* Additional component-specific styles can be added here */
+/* Most styling is handled by Tailwind CSS classes */
+
+/* Ensure table is scrollable on smaller screens if needed */
+@media (max-width: 640px) {
+  .transaction-card {
+    @apply bg-white;
+  }
+}

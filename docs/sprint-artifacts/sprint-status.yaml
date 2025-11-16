@@ -57,7 +57,7 @@ development_status:
   epic-2: backlog
   2-1-backend-transaction-crud-api: backlog
   2-2-category-management-api: backlog
-  2-3-transaction-list-view-component: backlog
+  2-3-transaction-list-view-component: done
   2-4-add-transaction-form: backlog
   2-5-edit-transaction-form: backlog
   2-6-delete-transaction-functionality: backlog
