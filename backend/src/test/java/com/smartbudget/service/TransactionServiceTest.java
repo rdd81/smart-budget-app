@@ -93,15 +93,41 @@ class TransactionServiceTest {
     @Test
     void getTransactions_ShouldReturnMappedPage() {
         Page<Transaction> page = new PageImpl<>(List.of(transaction));
-        when(transactionRepository.findByUserId(eq(userId), any(Pageable.class))).thenReturn(page);
+        when(transactionRepository.findByUserIdWithFilters(eq(userId), isNull(), isNull(), isNull(), anyList(), eq(false), any(Pageable.class)))
+                .thenReturn(page);
 
-        Page<TransactionResponse> result = transactionService.getTransactions(userId, 0, 5, "amount", "asc");
+        Page<TransactionResponse> result = transactionService.getTransactions(userId, 0, 5, "amount", "asc", null, null, null, null);
 
         assertThat(result.getContent()).hasSize(1);
         TransactionResponse response = result.getContent().get(0);
         assertThat(response.getId()).isEqualTo(transaction.getId());
         assertThat(response.getCategory().getName()).isEqualTo("Groceries");
-        verify(transactionRepository).findByUserId(eq(userId), any(Pageable.class));
+        verify(transactionRepository).findByUserIdWithFilters(eq(userId), isNull(), isNull(), isNull(), anyList(), eq(false), any(Pageable.class));
+    }
+
+    @Test
+    void getTransactions_WithFilters_ShouldApplyParameters() {
+        Page<Transaction> page = new PageImpl<>(List.of(transaction));
+        UUID categoryId = UUID.randomUUID();
+        when(transactionRepository.findByUserIdWithFilters(eq(userId), eq(TransactionType.INCOME),
+                eq(LocalDate.of(2025, 1, 1)), eq(LocalDate.of(2025, 1, 31)),
+                eq(List.of(categoryId)), eq(true), any(Pageable.class))).thenReturn(page);
+
+        Page<TransactionResponse> result = transactionService.getTransactions(
+                userId,
+                0,
+                10,
+                "transactionDate",
+                "desc",
+                LocalDate.of(2025, 1, 1),
+                LocalDate.of(2025, 1, 31),
+                List.of(categoryId),
+                TransactionType.INCOME);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(transactionRepository).findByUserIdWithFilters(eq(userId), eq(TransactionType.INCOME),
+                eq(LocalDate.of(2025, 1, 1)), eq(LocalDate.of(2025, 1, 31)),
+                eq(List.of(categoryId)), eq(true), any(Pageable.class));
     }
 
     @Test

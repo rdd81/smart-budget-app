@@ -4,6 +4,7 @@ import com.smartbudget.dto.TransactionRequest;
 import com.smartbudget.dto.TransactionResponse;
 import com.smartbudget.entity.Category;
 import com.smartbudget.entity.Transaction;
+import com.smartbudget.entity.TransactionType;
 import com.smartbudget.entity.User;
 import com.smartbudget.exception.ForbiddenOperationException;
 import com.smartbudget.exception.ResourceNotFoundException;
@@ -17,6 +18,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,13 +48,26 @@ public class TransactionService {
      * Retrieve paginated transactions for the authenticated user.
      */
     @Transactional(readOnly = true)
-    public Page<TransactionResponse> getTransactions(UUID userId, int page, int size, String sortBy, String sortDirection) {
+    public Page<TransactionResponse> getTransactions(
+            UUID userId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection,
+            LocalDate dateFrom,
+            LocalDate dateTo,
+            List<UUID> categoryIds,
+            TransactionType transactionType) {
         int sanitizedPage = Math.max(page, 0);
         int sanitizedSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Sort sort = resolveSort(sortBy, sortDirection);
         Pageable pageable = PageRequest.of(sanitizedPage, sanitizedSize, sort);
 
-        return transactionRepository.findByUserId(userId, pageable)
+        List<UUID> categories = categoryIds == null ? Collections.emptyList() : categoryIds;
+        boolean categoriesProvided = categories != null && !categories.isEmpty();
+
+        return transactionRepository
+                .findByUserIdWithFilters(userId, transactionType, dateFrom, dateTo, categories, categoriesProvided, pageable)
                 .map(this::mapToResponse);
     }
 

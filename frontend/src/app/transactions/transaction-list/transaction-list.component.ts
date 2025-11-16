@@ -1,19 +1,23 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TransactionService } from '../../services/transaction.service';
-import { Transaction, TransactionType } from '../../models/transaction.model';
+import { FormsModule } from '@angular/forms';
+import { TransactionService, TransactionQueryParams } from '../../services/transaction.service';
+import { CategoryService } from '../../services/category.service';
+import { Category, Transaction, TransactionType } from '../../models/transaction.model';
 import { Page } from '../../models/pagination.model';
 
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './transaction-list.component.html',
   styleUrl: './transaction-list.component.css',
 })
 export class TransactionListComponent implements OnInit {
   private readonly transactionService = inject(TransactionService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly filterStorageKey = 'transactionFilters';
 
   transactions: Transaction[] = [];
   loading = false;
@@ -33,6 +37,24 @@ export class TransactionListComponent implements OnInit {
   sortBy: 'transactionDate' | 'amount' | 'createdAt' = 'transactionDate';
   sortDirection: 'asc' | 'desc' = 'desc';
 
+  categories: Category[] = [];
+  categoryLoading = false;
+  categoryError: string | null = null;
+
+  filters: {
+    dateFrom: string | null;
+    dateTo: string | null;
+    transactionType: 'ALL' | TransactionType;
+    categoryIds: string[];
+  } = {
+    dateFrom: null,
+    dateTo: null,
+    transactionType: 'ALL',
+    categoryIds: []
+  };
+
+  filterPanelOpen = true;
+
   // Expose TransactionType enum to template
   readonly TransactionType = TransactionType;
 
@@ -40,19 +62,70 @@ export class TransactionListComponent implements OnInit {
   readonly Math = Math;
 
   ngOnInit(): void {
+    this.loadFiltersFromStorage();
+    this.loadCategories();
     this.loadTransactions();
+  }
+
+  private loadCategories(): void {
+    this.categoryLoading = true;
+    this.categoryService.getCategories().subscribe({
+      next: categories => {
+        this.categories = categories;
+        this.categoryLoading = false;
+      },
+      error: () => {
+        this.categoryLoading = false;
+        this.categoryError = 'Unable to load categories. Filters may be incomplete.';
+      }
+    });
+  }
+
+  private loadFiltersFromStorage(): void {
+    try {
+      const saved = sessionStorage.getItem(this.filterStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        this.filters.dateFrom = parsed.dateFrom ?? null;
+        this.filters.dateTo = parsed.dateTo ?? null;
+        this.filters.transactionType = parsed.transactionType ?? 'ALL';
+        this.filters.categoryIds = Array.isArray(parsed.categoryIds) ? parsed.categoryIds : [];
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  private persistFilters(): void {
+    const payload = JSON.stringify(this.filters);
+    sessionStorage.setItem(this.filterStorageKey, payload);
   }
 
   loadTransactions(): void {
     this.loading = true;
     this.error = null;
 
-    this.transactionService.getTransactions({
+    const query: TransactionQueryParams = {
       page: this.currentPage,
       size: this.pageSize,
       sortBy: this.sortBy,
       sortDirection: this.sortDirection
-    }).subscribe({
+    };
+
+    if (this.filters.dateFrom) {
+      query.dateFrom = this.filters.dateFrom;
+    }
+    if (this.filters.dateTo) {
+      query.dateTo = this.filters.dateTo;
+    }
+    if (this.filters.transactionType !== 'ALL') {
+      query.transactionType = this.filters.transactionType;
+    }
+    if (this.filters.categoryIds.length > 0) {
+      query.categoryIds = this.filters.categoryIds;
+    }
+
+    this.transactionService.getTransactions(query).subscribe({
       next: (page: Page<Transaction>) => {
         this.transactions = page.content;
         this.totalPages = page.totalPages;
@@ -66,6 +139,61 @@ export class TransactionListComponent implements OnInit {
         console.error('Error loading transactions:', err);
       }
     });
+  }
+
+  applyFilters(): void {
+    if (this.isDateRangeInvalid) {
+      return;
+    }
+    this.currentPage = 0;
+    this.persistFilters();
+    this.loadTransactions();
+  }
+
+  clearFilters(): void {
+    this.filters = {
+      dateFrom: null,
+      dateTo: null,
+      transactionType: 'ALL',
+      categoryIds: []
+    };
+    this.persistFilters();
+    this.currentPage = 0;
+    this.loadTransactions();
+  }
+
+  setTransactionType(type: 'ALL' | TransactionType): void {
+    this.filters.transactionType = type;
+  }
+
+  toggleCategorySelection(categoryId: string, checked: boolean): void {
+    if (checked) {
+      if (!this.filters.categoryIds.includes(categoryId)) {
+        this.filters.categoryIds = [...this.filters.categoryIds, categoryId];
+      }
+    } else {
+      this.filters.categoryIds = this.filters.categoryIds.filter(id => id !== categoryId);
+    }
+  }
+
+  isCategorySelected(categoryId: string): boolean {
+    return this.filters.categoryIds.includes(categoryId);
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(
+      (this.filters.dateFrom && this.filters.dateFrom.trim()) ||
+      (this.filters.dateTo && this.filters.dateTo.trim()) ||
+      this.filters.categoryIds.length ||
+      this.filters.transactionType !== 'ALL'
+    );
+  }
+
+  get isDateRangeInvalid(): boolean {
+    if (!this.filters.dateFrom || !this.filters.dateTo) {
+      return false;
+    }
+    return new Date(this.filters.dateFrom) > new Date(this.filters.dateTo);
   }
 
   onSort(column: 'transactionDate' | 'amount'): void {

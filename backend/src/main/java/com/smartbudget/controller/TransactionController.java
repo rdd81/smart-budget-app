@@ -2,6 +2,7 @@ package com.smartbudget.controller;
 
 import com.smartbudget.dto.TransactionRequest;
 import com.smartbudget.dto.TransactionResponse;
+import com.smartbudget.entity.TransactionType;
 import com.smartbudget.exception.ErrorResponse;
 import com.smartbudget.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,11 +14,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -46,10 +50,27 @@ public class TransactionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "date") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(name = "categoryId", required = false) List<UUID> categoryIds,
+            @RequestParam(required = false) TransactionType transactionType) {
 
         UUID userId = extractUserId(authentication);
-        Page<TransactionResponse> response = transactionService.getTransactions(userId, page, size, sortBy, sortDirection);
+        if (dateFrom != null && dateTo != null && dateFrom.isAfter(dateTo)) {
+            throw new IllegalArgumentException("The 'from' date cannot be after the 'to' date.");
+        }
+
+        Page<TransactionResponse> response = transactionService.getTransactions(
+                userId,
+                page,
+                size,
+                sortBy,
+                sortDirection,
+                dateFrom,
+                dateTo,
+                categoryIds,
+                transactionType);
         return ResponseEntity.ok(response);
     }
 

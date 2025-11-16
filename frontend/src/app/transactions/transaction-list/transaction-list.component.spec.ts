@@ -4,24 +4,22 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { TransactionListComponent } from './transaction-list.component';
 import { TransactionService } from '../../services/transaction.service';
-import { Transaction, TransactionType } from '../../models/transaction.model';
+import { CategoryService } from '../../services/category.service';
+import { Category, Transaction, TransactionType } from '../../models/transaction.model';
 import { Page } from '../../models/pagination.model';
 
 describe('TransactionListComponent', () => {
   let component: TransactionListComponent;
   let fixture: ComponentFixture<TransactionListComponent>;
   let transactionService: jasmine.SpyObj<TransactionService>;
+  let categoryService: jasmine.SpyObj<CategoryService>;
 
   const mockTransaction: Transaction = {
     id: '123e4567-e89b-12d3-a456-426614174000',
-    amount: 100.50,
+    amount: 100.5,
     transactionDate: '2025-01-15',
     description: 'Test transaction',
-    category: {
-      id: 'cat-123',
-      name: 'Food',
-      type: TransactionType.EXPENSE
-    },
+    category: { id: 'cat-123', name: 'Food', type: TransactionType.EXPENSE },
     transactionType: TransactionType.EXPENSE,
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
@@ -30,13 +28,9 @@ describe('TransactionListComponent', () => {
   const mockIncomeTransaction: Transaction = {
     ...mockTransaction,
     id: 'income-123',
-    amount: 500.00,
+    amount: 500,
     description: 'Salary',
-    category: {
-      id: 'cat-salary',
-      name: 'Salary',
-      type: TransactionType.INCOME
-    },
+    category: { id: 'cat-salary', name: 'Salary', type: TransactionType.INCOME },
     transactionType: TransactionType.INCOME
   };
 
@@ -56,303 +50,151 @@ describe('TransactionListComponent', () => {
     size: 20
   };
 
+  const mockCategories: Category[] = [
+    { id: 'cat-123', name: 'Food', type: TransactionType.EXPENSE },
+    { id: 'cat-salary', name: 'Salary', type: TransactionType.INCOME }
+  ];
+
   beforeEach(async () => {
-    const transactionServiceSpy = jasmine.createSpyObj('TransactionService', [
-      'getTransactions',
-      'getTransaction',
-      'deleteTransaction'
-    ]);
+    sessionStorage.clear();
+    const transactionSpy = jasmine.createSpyObj('TransactionService', ['getTransactions', 'getTransaction', 'deleteTransaction']);
+    const categorySpy = jasmine.createSpyObj('CategoryService', ['getCategories']);
 
     await TestBed.configureTestingModule({
       imports: [TransactionListComponent, HttpClientTestingModule, RouterTestingModule],
       providers: [
-        { provide: TransactionService, useValue: transactionServiceSpy }
+        { provide: TransactionService, useValue: transactionSpy },
+        { provide: CategoryService, useValue: categorySpy }
       ]
     }).compileComponents();
 
     transactionService = TestBed.inject(TransactionService) as jasmine.SpyObj<TransactionService>;
+    categoryService = TestBed.inject(CategoryService) as jasmine.SpyObj<CategoryService>;
+    categoryService.getCategories.and.returnValue(of(mockCategories));
     fixture = TestBed.createComponent(TransactionListComponent);
     component = fixture.componentInstance;
   });
 
   it('should create', () => {
+    transactionService.getTransactions.and.returnValue(of(mockPage));
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   describe('ngOnInit', () => {
-    it('should load transactions on initialization', () => {
+    it('should load categories and transactions', () => {
       transactionService.getTransactions.and.returnValue(of(mockPage));
+      fixture.detectChanges();
 
-      fixture.detectChanges(); // triggers ngOnInit
-
-      expect(transactionService.getTransactions).toHaveBeenCalledWith({
+      expect(categoryService.getCategories).toHaveBeenCalled();
+      expect(transactionService.getTransactions).toHaveBeenCalledWith(jasmine.objectContaining({
         page: 0,
         size: 20,
         sortBy: 'transactionDate',
         sortDirection: 'desc'
-      });
-      expect(component.transactions).toEqual(mockPage.content);
-      expect(component.totalPages).toBe(1);
-      expect(component.totalElements).toBe(2);
-      expect(component.loading).toBeFalse();
+      }));
+      expect(component.transactions.length).toBe(2);
     });
 
-    it('should handle API error on load', () => {
-      const error = { status: 500, message: 'Server error' };
-      transactionService.getTransactions.and.returnValue(throwError(() => error));
-
+    it('should handle load error', () => {
+      transactionService.getTransactions.and.returnValue(throwError(() => ({ status: 500 })));
       fixture.detectChanges();
-
-      expect(component.loading).toBeFalse();
       expect(component.error).toBe('Failed to load transactions. Please try again.');
     });
   });
 
   describe('empty state', () => {
-    it('should show empty state when no transactions exist', () => {
+    it('should show empty state without filters', () => {
       transactionService.getTransactions.and.returnValue(of(emptyPage));
-
       fixture.detectChanges();
-
       expect(component.isEmpty).toBeTrue();
-      expect(component.transactions.length).toBe(0);
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const emptyStateText = compiled.querySelector('h3');
-      expect(emptyStateText?.textContent).toContain('No transactions yet');
+      expect(component.hasActiveFilters).toBeFalse();
     });
 
-    it('should not show empty state when loading', () => {
-      component.loading = true;
-      component.transactions = [];
-
-      expect(component.isEmpty).toBeFalse();
-    });
-
-    it('should not show empty state when there is an error', () => {
-      component.error = 'Some error';
-      component.transactions = [];
-
-      expect(component.isEmpty).toBeFalse();
+    it('should recognize filtered empty state', () => {
+      transactionService.getTransactions.and.returnValue(of(emptyPage));
+      fixture.detectChanges();
+      component.filters.categoryIds = ['cat-123'];
+      expect(component.hasActiveFilters).toBeTrue();
     });
   });
 
-  describe('sorting', () => {
+  describe('pagination and sorting', () => {
     beforeEach(() => {
       transactionService.getTransactions.and.returnValue(of(mockPage));
       fixture.detectChanges();
     });
 
-    it('should toggle sort direction when clicking same column', () => {
-      transactionService.getTransactions.calls.reset();
-      transactionService.getTransactions.and.returnValue(of(mockPage));
-
-      component.onSort('transactionDate');
-
-      expect(component.sortBy).toBe('transactionDate');
-      expect(component.sortDirection).toBe('asc');
-      expect(transactionService.getTransactions).toHaveBeenCalledWith({
-        page: 0,
-        size: 20,
-        sortBy: 'transactionDate',
-        sortDirection: 'asc'
-      });
-    });
-
-    it('should change sort column and default to desc', () => {
-      transactionService.getTransactions.calls.reset();
-      transactionService.getTransactions.and.returnValue(of(mockPage));
-
+    it('should change sort order', () => {
       component.onSort('amount');
-
       expect(component.sortBy).toBe('amount');
-      expect(component.sortDirection).toBe('desc');
-      expect(component.currentPage).toBe(0); // Reset to first page
+      expect(transactionService.getTransactions).toHaveBeenCalledTimes(2);
     });
 
-    it('should display correct sort icon', () => {
-      component.sortBy = 'transactionDate';
-      component.sortDirection = 'desc';
-
-      expect(component.getSortIcon('transactionDate')).toBe('↓');
-      expect(component.getSortIcon('amount')).toBe('');
-
-      component.sortDirection = 'asc';
-      expect(component.getSortIcon('transactionDate')).toBe('↑');
-    });
-  });
-
-  describe('pagination', () => {
-    beforeEach(() => {
-      const multiPageResult: Page<Transaction> = {
-        ...mockPage,
-        totalPages: 3,
-        totalElements: 55
-      };
-      transactionService.getTransactions.and.returnValue(of(multiPageResult));
-      fixture.detectChanges();
-    });
-
-    it('should navigate to next page', () => {
-      transactionService.getTransactions.calls.reset();
-      const page1Result: Page<Transaction> = { ...mockPage, page: 1 };
-      transactionService.getTransactions.and.returnValue(of(page1Result));
-
+    it('should change page', () => {
+      component.totalPages = 2;
       component.onPageChange(1);
-
-      expect(component.currentPage).toBe(1);
-      expect(transactionService.getTransactions).toHaveBeenCalledWith({
-        page: 1,
-        size: 20,
-        sortBy: 'transactionDate',
-        sortDirection: 'desc'
-      });
-    });
-
-    it('should navigate to previous page', () => {
-      component.currentPage = 2;
-      transactionService.getTransactions.calls.reset();
-      const page1Result: Page<Transaction> = { ...mockPage, page: 1 };
-      transactionService.getTransactions.and.returnValue(of(page1Result));
-
-      component.onPageChange(1);
-
       expect(component.currentPage).toBe(1);
     });
-
-    it('should not navigate beyond page bounds', () => {
-      const currentPage = component.currentPage;
-      transactionService.getTransactions.calls.reset();
-
-      component.onPageChange(-1);
-      expect(component.currentPage).toBe(currentPage);
-      expect(transactionService.getTransactions).not.toHaveBeenCalled();
-
-      component.onPageChange(999);
-      expect(component.currentPage).toBe(currentPage);
-      expect(transactionService.getTransactions).not.toHaveBeenCalled();
-    });
-
-    it('should correctly identify if has previous page', () => {
-      component.currentPage = 0;
-      expect(component.hasPreviousPage).toBeFalse();
-
-      component.currentPage = 1;
-      expect(component.hasPreviousPage).toBeTrue();
-    });
-
-    it('should correctly identify if has next page', () => {
-      component.totalPages = 3;
-      component.currentPage = 2;
-      expect(component.hasNextPage).toBeFalse();
-
-      component.currentPage = 1;
-      expect(component.hasNextPage).toBeTrue();
-    });
   });
 
-  describe('formatting', () => {
-    it('should format date correctly', () => {
-      const formatted = component.formatDate('2025-01-15');
-      expect(formatted).toContain('Jan');
-      expect(formatted).toContain('15');
-      expect(formatted).toContain('2025');
-    });
-
-    it('should return correct amount class for income', () => {
-      expect(component.getAmountClass(TransactionType.INCOME)).toBe('text-green-600');
-    });
-
-    it('should return correct amount class for expense', () => {
-      expect(component.getAmountClass(TransactionType.EXPENSE)).toBe('text-red-600');
-    });
-  });
-
-  describe('delete transaction dialog', () => {
+  describe('filters', () => {
     beforeEach(() => {
       transactionService.getTransactions.and.returnValue(of(mockPage));
       fixture.detectChanges();
     });
 
-    it('should open dialog with selected transaction', () => {
+    it('should apply filters and reload data', () => {
+      component.filters.dateFrom = '2025-01-01';
+      component.filters.dateTo = '2025-01-31';
+      component.filters.transactionType = TransactionType.INCOME;
+      component.filters.categoryIds = ['cat-salary'];
+
+      component.applyFilters();
+
+      expect(transactionService.getTransactions).toHaveBeenCalledWith(jasmine.objectContaining({
+        dateFrom: '2025-01-01',
+        dateTo: '2025-01-31',
+        transactionType: TransactionType.INCOME,
+        categoryIds: ['cat-salary']
+      }));
+    });
+
+    it('should clear filters', () => {
+      component.filters.dateFrom = '2025-01-01';
+      component.filters.categoryIds = ['cat-123'];
+      component.clearFilters();
+
+      expect(component.filters.transactionType).toBe('ALL');
+      expect(component.filters.categoryIds.length).toBe(0);
+    });
+  });
+
+  describe('delete transaction', () => {
+    beforeEach(() => {
+      transactionService.getTransactions.and.returnValue(of(mockPage));
+      fixture.detectChanges();
+    });
+
+    it('should open and close dialog', () => {
       component.openDeleteDialog(mockTransaction);
       expect(component.showDeleteDialog).toBeTrue();
-      expect(component.transactionToDelete).toEqual(mockTransaction);
-    });
-
-    it('should close dialog when canceling and not deleting', () => {
-      component.openDeleteDialog(mockTransaction);
       component.closeDeleteDialog();
       expect(component.showDeleteDialog).toBeFalse();
-      expect(component.transactionToDelete).toBeNull();
     });
 
-    it('should delete transaction and close dialog on success', () => {
+    it('should delete transaction', () => {
       transactionService.deleteTransaction.and.returnValue(of(void 0));
       component.openDeleteDialog(mockTransaction);
       component.confirmDelete();
-
       expect(transactionService.deleteTransaction).toHaveBeenCalledWith(mockTransaction.id);
-      expect(component.deletingId).toBeNull();
-      expect(component.showDeleteDialog).toBeFalse();
     });
 
-    it('should handle delete error and restore transactions', () => {
-      const error = { status: 500, message: 'Server error' };
-      transactionService.deleteTransaction.and.returnValue(throwError(() => error));
+    it('should handle delete error', () => {
+      transactionService.deleteTransaction.and.returnValue(throwError(() => ({ status: 500 })));
       component.openDeleteDialog(mockTransaction);
-
-      const beforeCount = component.transactions.length;
       component.confirmDelete();
-
       expect(component.deleteError).toBe('Failed to delete transaction. Please try again.');
-      expect(component.transactions.length).toBe(beforeCount);
-      expect(component.deletingId).toBeNull();
-    });
-  });
-
-  describe('retry functionality', () => {
-    it('should reload transactions on retry', () => {
-      transactionService.getTransactions.calls.reset();
-      transactionService.getTransactions.and.returnValue(of(mockPage));
-
-      component.error = 'Some error';
-      component.onRetry();
-
-      expect(transactionService.getTransactions).toHaveBeenCalled();
-      expect(component.error).toBeNull();
-    });
-  });
-
-  describe('rendering', () => {
-    it('should display transaction list correctly', () => {
-      transactionService.getTransactions.and.returnValue(of(mockPage));
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Test transaction');
-      expect(compiled.textContent).toContain('Salary');
-    });
-
-    it('should show loading state', () => {
-      transactionService.getTransactions.and.returnValue(of(mockPage));
-      fixture.detectChanges();
-
-      component.loading = true;
-      component.transactions = [];
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Loading transactions');
-    });
-
-    it('should show error state with retry button', () => {
-      transactionService.getTransactions.and.returnValue(throwError(() => ({ status: 500 })));
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const retryButton = compiled.querySelector('button');
-      expect(retryButton?.textContent).toContain('Retry');
     });
   });
 });

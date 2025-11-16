@@ -86,6 +86,7 @@ class TransactionControllerIntegrationTest {
     private User primaryUser;
     private User secondaryUser;
     private Category defaultCategory;
+    private Category incomeCategory;
     private String primaryToken;
 
     @BeforeAll
@@ -101,6 +102,10 @@ class TransactionControllerIntegrationTest {
         List<Category> expenseCategories = categoryRepository.findByType(CategoryType.EXPENSE);
         assertThat(expenseCategories).isNotEmpty();
         defaultCategory = expenseCategories.get(0);
+
+        List<Category> incomeCategories = categoryRepository.findByType(CategoryType.INCOME);
+        assertThat(incomeCategories).isNotEmpty();
+        incomeCategory = incomeCategories.get(0);
 
         primaryUser = new User("primary@example.com", passwordEncoder.encode("Password123!"));
         primaryUser = userRepository.save(primaryUser);
@@ -204,8 +209,29 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("Transaction not found"));
     }
 
+    @Test
+    void getTransactions_WithFilters_ShouldReturnMatchingRecords() throws Exception {
+        createTransaction(primaryUser, new BigDecimal("50.00"), LocalDate.now().minusDays(10), "Groceries");
+        createTransaction(primaryUser, new BigDecimal("75.00"), LocalDate.now().minusDays(2), "Dining");
+        createTransaction(primaryUser, new BigDecimal("900.00"), LocalDate.now(), "Salary", incomeCategory, TransactionType.INCOME);
+
+        mockMvc.perform(get("/api/transactions")
+                        .param("transactionType", "INCOME")
+                        .param("dateFrom", LocalDate.now().minusDays(3).toString())
+                        .param("categoryId", incomeCategory.getId().toString())
+                        .header("Authorization", bearer(primaryToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].transactionType").value("INCOME"))
+                .andExpect(jsonPath("$.content[0].description").value("Salary"));
+    }
+
     private Transaction createTransaction(User owner, BigDecimal amount, LocalDate date, String description) {
-        Transaction transaction = new Transaction(owner, amount, date, description, defaultCategory, TransactionType.EXPENSE);
+        return createTransaction(owner, amount, date, description, defaultCategory, TransactionType.EXPENSE);
+    }
+
+    private Transaction createTransaction(User owner, BigDecimal amount, LocalDate date, String description, Category category, TransactionType type) {
+        Transaction transaction = new Transaction(owner, amount, date, description, category, type);
         return transactionRepository.save(transaction);
     }
 

@@ -5,6 +5,9 @@
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Transactions</h1>
         <p class="mt-2 text-sm text-gray-600">View and manage all your financial transactions</p>
+        <p class="mt-2 text-xs text-gray-500">
+          Showing <strong>{{ transactions.length }}</strong> of <strong>{{ totalElements }}</strong> transactions
+        </p>
       </div>
       <a
         routerLink="/transactions/new"
@@ -12,6 +15,106 @@
       >
         Add Transaction
       </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white shadow rounded-2xl mb-6 p-4 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p class="text-lg font-semibold text-gray-900">Filters</p>
+          <p class="text-sm text-gray-500">Narrow down your transactions by date, category, or type.</p>
+        </div>
+        <button
+          type="button"
+          class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+          (click)="filterPanelOpen = !filterPanelOpen"
+        >
+          {{ filterPanelOpen ? 'Hide Filters' : 'Show Filters' }}
+        </button>
+      </div>
+
+      <div *ngIf="categoryError" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">
+        {{ categoryError }}
+      </div>
+
+      <div *ngIf="filterPanelOpen" class="space-y-4">
+        <div class="grid gap-4 md:grid-cols-3">
+          <div>
+            <label class="filter-label">Date Range</label>
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                type="date"
+                name="dateFrom"
+                [(ngModel)]="filters.dateFrom"
+                class="filter-input"
+              />
+              <input
+                type="date"
+                name="dateTo"
+                [(ngModel)]="filters.dateTo"
+                class="filter-input"
+              />
+            </div>
+            <small *ngIf="isDateRangeInvalid" class="text-red-600 text-xs mt-1 block">
+              "To" date cannot be before "from" date.
+            </small>
+          </div>
+
+          <div>
+            <label class="filter-label">Transaction Type</label>
+            <div class="type-toggle" role="group" aria-label="Transaction type">
+              <button
+                type="button"
+                [class.active]="filters.transactionType === 'ALL'"
+                (click)="setTransactionType('ALL')"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                [class.active]="filters.transactionType === TransactionType.INCOME"
+                (click)="setTransactionType(TransactionType.INCOME)"
+              >
+                Income
+              </button>
+              <button
+                type="button"
+                [class.active]="filters.transactionType === TransactionType.EXPENSE"
+                (click)="setTransactionType(TransactionType.EXPENSE)"
+              >
+                Expense
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="filter-label">Categories</label>
+            <div class="max-h-36 overflow-y-auto border border-gray-200 rounded-xl p-3 space-y-2 bg-gray-50">
+              <label
+                *ngFor="let category of categories"
+                class="flex items-center space-x-2 text-sm text-gray-700"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isCategorySelected(category.id)"
+                  (change)="toggleCategorySelection(category.id, $event.target.checked)"
+                />
+                <span>{{ category.name }}</span>
+              </label>
+              <p *ngIf="categoryLoading" class="text-xs text-gray-500">Loading categories...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-3">
+          <button type="button" class="ghost-button" (click)="clearFilters()" [disabled]="!hasActiveFilters">
+            Clear Filters
+          </button>
+          <button type="button" class="primary-button" (click)="applyFilters()" [disabled]="isDateRangeInvalid">
+            Apply Filters
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -49,7 +152,7 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="isEmpty" class="bg-white shadow-md rounded-lg p-12 text-center">
+    <div *ngIf="isEmpty && !hasActiveFilters" class="bg-white shadow-md rounded-lg p-12 text-center">
       <svg class="mx-auto h-24 w-24 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
@@ -282,6 +385,17 @@
             </nav>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div *ngIf="isEmpty && hasActiveFilters && !error" class="bg-white shadow-md rounded-lg p-12 text-center">
+      <svg class="mx-auto h-16 w-16 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h4a1 1 0 001-1v-6h3l-6-6-6 6h3v6a1 1 0 001 1z" />
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">No transactions match your filters</h3>
+      <p class="mt-2 text-sm text-gray-500">Try adjusting your criteria or clearing filters.</p>
+      <div class="mt-4">
+        <button type="button" class="ghost-button" (click)="clearFilters()">Clear Filters</button>
       </div>
     </div>
   </div>

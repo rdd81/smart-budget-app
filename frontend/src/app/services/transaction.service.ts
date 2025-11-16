@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Transaction, TransactionRequest } from '../models/transaction.model';
+import { Transaction, TransactionRequest, TransactionType } from '../models/transaction.model';
 import { Page } from '../models/pagination.model';
 import { environment } from '../../environments/environment';
 
@@ -10,6 +10,10 @@ export interface TransactionQueryParams {
   size?: number;
   sortBy?: 'transactionDate' | 'amount' | 'createdAt';
   sortDirection?: 'asc' | 'desc';
+  dateFrom?: string;
+  dateTo?: string;
+  categoryIds?: string[];
+  transactionType?: TransactionType;
 }
 
 @Injectable({
@@ -38,6 +42,21 @@ export class TransactionService {
       if (params.sortDirection) {
         httpParams = httpParams.set('sortDirection', params.sortDirection);
       }
+    }
+
+    if (params?.dateFrom) {
+      httpParams = httpParams.set('dateFrom', params.dateFrom);
+    }
+    if (params?.dateTo) {
+      httpParams = httpParams.set('dateTo', params.dateTo);
+    }
+    if (params?.transactionType) {
+      httpParams = httpParams.set('transactionType', params.transactionType);
+    }
+    if (params?.categoryIds?.length) {
+      params.categoryIds.forEach(id => {
+        httpParams = httpParams.append('categoryId', id);
+      });
     }
 
     return this.http.get<Page<Transaction>>(this.apiUrl, { params: httpParams });

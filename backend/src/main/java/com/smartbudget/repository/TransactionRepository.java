@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,13 +60,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     List<Transaction> findByUserIdAndCategoryId(UUID userId, UUID categoryId);
 
     /**
-     * Paged retrieval of transactions for a user.
-     *
-     * @param userId the user ID
-     * @param pageable pagination and sorting information
-     * @return page of transactions
+     * Paged retrieval of transactions for a user with optional filters.
      */
-    Page<Transaction> findByUserId(UUID userId, Pageable pageable);
+    @Query("""
+            SELECT t FROM Transaction t
+            WHERE t.user.id = :userId
+            AND (:transactionType IS NULL OR t.transactionType = :transactionType)
+            AND (:dateFrom IS NULL OR t.transactionDate >= :dateFrom)
+            AND (:dateTo IS NULL OR t.transactionDate <= :dateTo)
+            AND (:categoriesProvided = false OR t.category.id IN :categoryIds)
+            """)
+    Page<Transaction> findByUserIdWithFilters(
+            UUID userId,
+            TransactionType transactionType,
+            LocalDate dateFrom,
+            LocalDate dateTo,
+            List<UUID> categoryIds,
+            boolean categoriesProvided,
+            Pageable pageable);
 
     /**
      * Get total income for a user within a date range.
