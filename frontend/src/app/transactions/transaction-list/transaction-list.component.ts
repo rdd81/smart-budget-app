@@ -17,7 +17,11 @@ export class TransactionListComponent implements OnInit {
 
   transactions: Transaction[] = [];
   loading = false;
+  deletingId: string | null = null;
   error: string | null = null;
+  deleteError: string | null = null;
+  showDeleteDialog = false;
+  transactionToDelete: Transaction | null = null;
 
   // Pagination
   currentPage = 0;
@@ -88,22 +92,52 @@ export class TransactionListComponent implements OnInit {
     this.loadTransactions();
   }
 
-  onDelete(transaction: Transaction): void {
-    if (confirm(`Are you sure you want to delete this transaction?\n\n${transaction.description}\nAmount: $${transaction.amount.toFixed(2)}`)) {
-      this.loading = true;
-      this.transactionService.deleteTransaction(transaction.id).subscribe({
-        next: () => {
-          this.loading = false;
-          // Reload transactions after successful delete
-          this.loadTransactions();
-        },
-        error: (err) => {
-          this.loading = false;
-          this.error = 'Failed to delete transaction. Please try again.';
-          console.error('Error deleting transaction:', err);
-        }
-      });
+  openDeleteDialog(transaction: Transaction): void {
+    this.transactionToDelete = transaction;
+    this.showDeleteDialog = true;
+    this.deleteError = null;
+  }
+
+  closeDeleteDialog(): void {
+    if (this.deletingId) {
+      return;
     }
+    this.showDeleteDialog = false;
+    this.transactionToDelete = null;
+    this.deleteError = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.transactionToDelete || this.deletingId) {
+      return;
+    }
+
+    const { id } = this.transactionToDelete;
+    this.deletingId = id;
+    this.deleteError = null;
+
+    const previousTransactions = [...this.transactions];
+    this.transactions = this.transactions.filter(tx => tx.id !== id);
+    this.totalElements = Math.max(this.totalElements - 1, 0);
+
+    this.transactionService.deleteTransaction(id).subscribe({
+      next: () => {
+        this.deletingId = null;
+        this.showDeleteDialog = false;
+        this.transactionToDelete = null;
+        if (this.transactions.length === 0 && this.currentPage > 0) {
+          this.currentPage--;
+          this.loadTransactions();
+        }
+      },
+      error: (err) => {
+        this.deletingId = null;
+        this.transactions = previousTransactions;
+        this.totalElements = previousTransactions.length;
+        this.deleteError = 'Failed to delete transaction. Please try again.';
+        console.error('Error deleting transaction:', err);
+      }
+    });
   }
 
   formatDate(dateString: string): string {

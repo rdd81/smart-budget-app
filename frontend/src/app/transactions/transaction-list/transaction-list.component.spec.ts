@@ -268,44 +268,46 @@ describe('TransactionListComponent', () => {
     });
   });
 
-  describe('delete transaction', () => {
+  describe('delete transaction dialog', () => {
     beforeEach(() => {
       transactionService.getTransactions.and.returnValue(of(mockPage));
       fixture.detectChanges();
-      spyOn(window, 'confirm');
     });
 
-    it('should delete transaction when user confirms', () => {
-      (window.confirm as jasmine.Spy).and.returnValue(true);
+    it('should open dialog with selected transaction', () => {
+      component.openDeleteDialog(mockTransaction);
+      expect(component.showDeleteDialog).toBeTrue();
+      expect(component.transactionToDelete).toEqual(mockTransaction);
+    });
+
+    it('should close dialog when canceling and not deleting', () => {
+      component.openDeleteDialog(mockTransaction);
+      component.closeDeleteDialog();
+      expect(component.showDeleteDialog).toBeFalse();
+      expect(component.transactionToDelete).toBeNull();
+    });
+
+    it('should delete transaction and close dialog on success', () => {
       transactionService.deleteTransaction.and.returnValue(of(void 0));
-      transactionService.getTransactions.calls.reset();
-      transactionService.getTransactions.and.returnValue(of(emptyPage));
+      component.openDeleteDialog(mockTransaction);
+      component.confirmDelete();
 
-      component.onDelete(mockTransaction);
-
-      expect(window.confirm).toHaveBeenCalled();
       expect(transactionService.deleteTransaction).toHaveBeenCalledWith(mockTransaction.id);
-      expect(transactionService.getTransactions).toHaveBeenCalled(); // Reload after delete
+      expect(component.deletingId).toBeNull();
+      expect(component.showDeleteDialog).toBeFalse();
     });
 
-    it('should not delete when user cancels', () => {
-      (window.confirm as jasmine.Spy).and.returnValue(false);
-
-      component.onDelete(mockTransaction);
-
-      expect(window.confirm).toHaveBeenCalled();
-      expect(transactionService.deleteTransaction).not.toHaveBeenCalled();
-    });
-
-    it('should handle delete error', () => {
-      (window.confirm as jasmine.Spy).and.returnValue(true);
+    it('should handle delete error and restore transactions', () => {
       const error = { status: 500, message: 'Server error' };
       transactionService.deleteTransaction.and.returnValue(throwError(() => error));
+      component.openDeleteDialog(mockTransaction);
 
-      component.onDelete(mockTransaction);
+      const beforeCount = component.transactions.length;
+      component.confirmDelete();
 
-      expect(component.error).toBe('Failed to delete transaction. Please try again.');
-      expect(component.loading).toBeFalse();
+      expect(component.deleteError).toBe('Failed to delete transaction. Please try again.');
+      expect(component.transactions.length).toBe(beforeCount);
+      expect(component.deletingId).toBeNull();
     });
   });
 
