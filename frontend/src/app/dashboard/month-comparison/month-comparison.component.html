@@ -1,0 +1,80 @@
+<section class="comparison-card">
+  <header class="comparison-header">
+    <div>
+      <h3>Month-over-Month Comparison</h3>
+      <p>Compare this period to the previous month.</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert error">
+    {{ error }}
+    <button class="ghost-button" (click)="fetchSummaries()">Retry</button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <span>Loading comparison...</span>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div class="comparison-grid" *ngIf="hasData; else emptyState">
+      <article class="comparison-card-item">
+        <div class="card-label">
+          <p>Income</p>
+          <small>{{ currentSummary?.startDate | date: 'MMM y' }}</small>
+        </div>
+        <div class="card-value">{{ formatCurrency(currentSummary?.totalIncome) }}</div>
+        <div class="card-meta">
+          <p>Previous: {{ formatCurrency(previousSummary?.totalIncome) }}</p>
+          <span class="change-pill" [ngClass]="incomeChange().colorClass">
+            <span class="arrow" *ngIf="incomeChange().arrow !== 'neutral'">
+              {{ incomeChange().arrow === 'up' ? '▲' : '▼' }}
+            </span>
+            {{ incomeChange().value }}
+          </span>
+        </div>
+      </article>
+
+      <article class="comparison-card-item">
+        <div class="card-label">
+          <p>Expenses</p>
+          <small>{{ currentSummary?.startDate | date: 'MMM y' }}</small>
+        </div>
+        <div class="card-value">{{ formatCurrency(currentSummary?.totalExpenses) }}</div>
+        <div class="card-meta">
+          <p>Previous: {{ formatCurrency(previousSummary?.totalExpenses) }}</p>
+          <span class="change-pill" [ngClass]="expenseChange().colorClass">
+            <span class="arrow" *ngIf="expenseChange().arrow !== 'neutral'">
+              {{ expenseChange().arrow === 'up' ? '▲' : '▼' }}
+            </span>
+            {{ expenseChange().value }}
+          </span>
+        </div>
+      </article>
+
+      <article class="comparison-card-item">
+        <div class="card-label">
+          <p>Balance</p>
+          <small>{{ currentSummary?.startDate | date: 'MMM y' }}</small>
+        </div>
+        <div class="card-value">{{ formatCurrency(currentSummary?.balance) }}</div>
+        <div class="card-meta">
+          <p>Previous: {{ formatCurrency(previousSummary?.balance) }}</p>
+          <span class="change-pill" [ngClass]="balanceChange().colorClass">
+            <span class="arrow" *ngIf="balanceChange().arrow !== 'neutral'">
+              {{ balanceChange().arrow === 'up' ? '▲' : '▼' }}
+            </span>
+            {{ balanceChange().value }}
+          </span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h4>Not enough data</h4>
+      <p>Add transactions across months to see comparisons.</p>
+    </div>
+  </ng-template>
+</section>

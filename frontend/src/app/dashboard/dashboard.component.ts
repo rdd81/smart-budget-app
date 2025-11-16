@@ -8,11 +8,19 @@ import { SummaryResponse } from '../models/analytics.model';
 import { CategoryBreakdownComponent } from './category-breakdown/category-breakdown.component';
 import { ExpensePieChartComponent } from './expense-pie-chart/expense-pie-chart.component';
 import { SpendingTrendsChartComponent } from './spending-trends-chart/spending-trends-chart.component';
+import { MonthComparisonComponent } from './month-comparison/month-comparison.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CategoryBreakdownComponent, ExpensePieChartComponent, SpendingTrendsChartComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CategoryBreakdownComponent,
+    ExpensePieChartComponent,
+    SpendingTrendsChartComponent,
+    MonthComparisonComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
