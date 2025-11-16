@@ -1,39 +1,106 @@
-<div class="min-h-screen bg-gray-50">
-  <nav class="bg-white shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <h1 class="text-xl font-semibold text-gray-900">Smart Budget</h1>
-        </div>
-        <div class="flex items-center">
-          <span class="text-sm text-gray-700 mr-4" *ngIf="currentUser">
-            {{ currentUser.email }}
-          </span>
-          <button
-            (click)="onLogout()"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            aria-label="Logout"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
+<div class="dashboard-shell">
+  <header class="dashboard-header">
+    <div>
+      <p class="welcome-text">Welcome back,</p>
+      <h1 class="user-name">{{ currentUser?.email || 'Guest User' }}</h1>
     </div>
-  </nav>
+    <button class="logout-button" (click)="onLogout()">Log out</button>
+  </header>
 
-  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
-      <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-          Welcome to Smart Budget!
-        </h2>
-        <p class="text-gray-600 mb-4" *ngIf="currentUser">
-          You are logged in as <strong>{{ currentUser.email }}</strong>
-        </p>
-        <p class="text-gray-600">
-          Your budget management dashboard will be available here soon.
-        </p>
+  <section class="dashboard-content">
+    <div class="filter-card">
+      <div class="filter-header">
+        <div>
+          <p class="filter-title">Monthly summary</p>
+          <p class="filter-subtitle">Select a month or custom range to refresh insights.</p>
+        </div>
+        <select
+          class="select-control"
+          [ngModel]="selectedMonthKey"
+          (ngModelChange)="onMonthChange($event)"
+        >
+          <option *ngFor="let option of monthOptions" [value]="option.key">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="isCustomRange" class="custom-range">
+        <div class="range-inputs">
+          <label>
+            Start date
+            <input type="date" [(ngModel)]="customRange.start" />
+          </label>
+          <label>
+            End date
+            <input type="date" [(ngModel)]="customRange.end" />
+          </label>
+        </div>
+        <button class="ghost-button" (click)="applyCustomRange()">Apply Range</button>
       </div>
     </div>
-  </main>
+
+    <div *ngIf="error" class="alert error">
+      <div>
+        {{ error }}
+      </div>
+      <button class="ghost-button" (click)="selectedMonthKey === 'custom' ? applyCustomRange() : onMonthChange(selectedMonthKey)">
+        Retry
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="card-grid">
+      <div class="summary-card skeleton" *ngFor="let _ of [1,2,3]">
+        <div class="skeleton-bar large"></div>
+        <div class="skeleton-bar small"></div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && !error">
+      <div class="card-grid" *ngIf="summary && summary.transactionCount > 0">
+        <div class="summary-card income-card">
+          <div class="card-icon icon-income">
+            <span>↑</span>
+          </div>
+          <div>
+            <p class="card-label">Income</p>
+            <p class="card-value">{{ formatCurrency(summary?.totalIncome) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card expense-card">
+          <div class="card-icon icon-expense">
+            <span>↓</span>
+          </div>
+          <div>
+            <p class="card-label">Expenses</p>
+            <p class="card-value">{{ formatCurrency(summary?.totalExpenses) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card balance-card" [ngClass]="balanceClass">
+          <div class="card-icon icon-balance">
+            <span>Σ</span>
+          </div>
+          <div>
+            <p class="card-label">Balance</p>
+            <p class="card-value">{{ formatCurrency(summary?.balance) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isEmpty" class="empty-state">
+        <h3>No transactions yet</h3>
+        <p>Add transactions for the selected period to see insights.</p>
+      </div>
+
+      <p *ngIf="summary && summary.transactionCount > 0" class="date-range">
+        Showing data for:
+        <strong>
+          {{ summary.startDate | date: 'MMM d, y' }} -
+          {{ summary.endDate | date: 'MMM d, y' }}
+        </strong>
+      </p>
+    </div>
+  </section>
 </div>

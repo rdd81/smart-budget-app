@@ -1,1 +1,271 @@
-/* Component-specific styles - using Tailwind utility classes in template */
+.dashboard-shell {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 2rem 1rem 4rem;
+}
+
+.dashboard-header {
+  max-width: 960px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.welcome-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.user-name {
+  margin: 0.2rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.logout-button {
+  border: none;
+  background: linear-gradient(120deg, #6366f1, #8b5cf6);
+  color: white;
+  border-radius: 999px;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.35);
+}
+
+.dashboard-content {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filter-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-title {
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.filter-subtitle {
+  color: #64748b;
+  margin: 0.15rem 0 0;
+}
+
+.select-control {
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.custom-range {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.range-inputs {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.range-inputs label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.range-inputs input {
+  margin-top: 0.35rem;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5f5;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+}
+
+.ghost-button {
+  border: 1px solid #c7d2fe;
+  background: white;
+  color: #4f46e5;
+  border-radius: 999px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.card-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+}
+
+.icon-income {
+  background: #22c55e;
+}
+
+.icon-expense {
+  background: #ef4444;
+}
+
+.icon-balance {
+  background: #3b82f6;
+}
+
+.card-label {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.card-value {
+  margin: 0.2rem 0 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.balance-card.positive-balance {
+  border: 1px solid #22c55e;
+}
+
+.balance-card.negative-balance {
+  border: 1px solid #ef4444;
+}
+
+.balance-card.neutral-balance {
+  border: 1px solid #cbd5f5;
+}
+
+.alert {
+  border-radius: 1.25rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.alert.error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.skeleton {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.skeleton-bar {
+  background: linear-gradient(90deg, #f1f5f9, #e2e8f0, #f1f5f9);
+  border-radius: 999px;
+}
+
+.skeleton-bar.large {
+  width: 60%;
+  height: 1.5rem;
+}
+
+.skeleton-bar.small {
+  width: 40%;
+  height: 1rem;
+  margin-top: 0.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06);
+}
+
+.empty-state h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.empty-state p {
+  color: #64748b;
+  margin-top: 0.5rem;
+}
+
+.date-range {
+  margin-top: 1rem;
+  color: #475569;
+  text-align: center;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
