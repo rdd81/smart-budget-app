@@ -212,4 +212,47 @@ describe('TransactionService', () => {
       req.flush('Validation error', { status: 400, statusText: 'Bad Request' });
     });
   });
+
+  describe('updateTransaction', () => {
+    it('should PUT payload to update transaction', () => {
+      const payload = {
+        amount: 42,
+        transactionDate: '2025-02-03',
+        description: 'Updated',
+        categoryId: 'cat-123',
+        transactionType: TransactionType.EXPENSE
+      };
+
+      const id = 'abc';
+      service.updateTransaction(id, payload).subscribe(response => {
+        expect(response).toEqual(mockTransaction);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/${id}`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(payload);
+      req.flush(mockTransaction);
+    });
+
+    it('should propagate update errors', () => {
+      const payload = {
+        amount: 5,
+        transactionDate: '2025-02-03',
+        description: 'Error',
+        categoryId: 'cat-123',
+        transactionType: TransactionType.INCOME
+      };
+
+      const id = 'abc';
+      service.updateTransaction(id, payload).subscribe({
+        next: () => fail('should have failed'),
+        error: error => {
+          expect(error.status).toBe(404);
+        }
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/${id}`);
+      req.flush('Not found', { status: 404, statusText: 'Not Found' });
+    });
+  });
 });

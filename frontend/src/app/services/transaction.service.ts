@@ -63,4 +63,11 @@ export class TransactionService {
   createTransaction(payload: TransactionRequest): Observable<Transaction> {
     return this.http.post<Transaction>(this.apiUrl, payload);
   }
+
+  /**
+   * Update an existing transaction
+   */
+  updateTransaction(id: string, payload: TransactionRequest): Observable<Transaction> {
+    return this.http.put<Transaction>(`${this.apiUrl}/${id}`, payload);
+  }
 }

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { TransactionListComponent } from './transaction-list.component';
 import { TransactionService } from '../../services/transaction.service';
@@ -63,7 +64,7 @@ describe('TransactionListComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [TransactionListComponent, HttpClientTestingModule],
+      imports: [TransactionListComponent, HttpClientTestingModule, RouterTestingModule],
       providers: [
         { provide: TransactionService, useValue: transactionServiceSpy }
       ]
