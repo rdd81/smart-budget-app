@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Transaction } from '../models/transaction.model';
+import { Transaction, TransactionRequest } from '../models/transaction.model';
 import { Page } from '../models/pagination.model';
 import { environment } from '../../environments/environment';
 
@@ -55,5 +55,12 @@ export class TransactionService {
    */
   deleteTransaction(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  /**
+   * Create a new transaction
+   */
+  createTransaction(payload: TransactionRequest): Observable<Transaction> {
+    return this.http.post<Transaction>(this.apiUrl, payload);
   }
 }

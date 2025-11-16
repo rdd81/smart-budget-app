@@ -1,0 +1,148 @@
+<section class="add-transaction-container">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Add Transaction</p>
+      <h1>Record a new income or expense</h1>
+      <p class="subtitle">Complete the form below to keep your budget up to date.</p>
+    </div>
+    <a routerLink="/transactions" class="ghost-button">
+      Back to Transactions
+    </a>
+  </div>
+
+  <div *ngIf="successMessage" class="alert success" role="status">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="submitError" class="alert error" role="alert">
+    {{ submitError }}
+  </div>
+
+  <div *ngIf="loadError" class="alert error" role="alert">
+    {{ loadError }}
+    <button type="button" class="inline-button" (click)="reloadCategories()">Retry</button>
+  </div>
+
+  <div *ngIf="loadingCategories" class="loading-state">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading categories...</p>
+  </div>
+
+  <form
+    *ngIf="!loadingCategories"
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="transaction-form"
+    novalidate
+  >
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="amount">Amount</label>
+        <input
+          id="amount"
+          type="number"
+          step="0.01"
+          min="0.01"
+          placeholder="0.00"
+          formControlName="amount"
+          [class.invalid]="hasError('amount', 'required') || hasError('amount', 'min')"
+        />
+        <small *ngIf="hasError('amount', 'required')" class="error-message">
+          Amount is required.
+        </small>
+        <small *ngIf="hasError('amount', 'min')" class="error-message">
+          Amount must be greater than zero.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="transactionDate">Date</label>
+        <input
+          id="transactionDate"
+          type="date"
+          formControlName="transactionDate"
+          [class.invalid]="hasError('transactionDate', 'required') || hasError('transactionDate', 'futureDate')"
+        />
+        <small *ngIf="hasError('transactionDate', 'required')" class="error-message">
+          Date is required.
+        </small>
+        <small *ngIf="hasError('transactionDate', 'futureDate')" class="error-message">
+          Date cannot be in the future.
+        </small>
+      </div>
+
+      <div class="form-field full-width">
+        <label for="description">Description</label>
+        <input
+          id="description"
+          type="text"
+          formControlName="description"
+          maxlength="255"
+          placeholder="E.g. Grocery run, rent payment, bonus..."
+          [class.invalid]="hasError('description', 'required') || hasError('description', 'maxlength')"
+        />
+        <small *ngIf="hasError('description', 'required')" class="error-message">
+          Description is required.
+        </small>
+        <small *ngIf="hasError('description', 'maxlength')" class="error-message">
+          Description cannot exceed 255 characters.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Transaction Type</label>
+        <div class="type-toggle" role="group" aria-label="Transaction type">
+          <button
+            type="button"
+            [class.active]="form.controls.transactionType.value === TransactionType.EXPENSE"
+            (click)="form.controls.transactionType.setValue(TransactionType.EXPENSE)"
+          >
+            Expense
+          </button>
+          <button
+            type="button"
+            [class.active]="form.controls.transactionType.value === TransactionType.INCOME"
+            (click)="form.controls.transactionType.setValue(TransactionType.INCOME)"
+          >
+            Income
+          </button>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="categoryId">Category</label>
+        <select
+          id="categoryId"
+          formControlName="categoryId"
+          [disabled]="filteredCategories.length === 0"
+          [class.invalid]="hasError('categoryId', 'required')"
+        >
+          <option value="" disabled selected>Select category</option>
+          <option *ngFor="let category of filteredCategories" [value]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+        <small *ngIf="filteredCategories.length === 0" class="muted">
+          No categories available for this type.
+        </small>
+        <small *ngIf="hasError('categoryId', 'required')" class="error-message">
+          Category is required.
+        </small>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="ghost-button" (click)="onCancel()">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="submitInProgress || loadingCategories || form.invalid"
+      >
+        <span *ngIf="submitInProgress" class="button-spinner" aria-hidden="true"></span>
+        {{ submitInProgress ? 'Saving...' : 'Add Transaction' }}
+      </button>
+    </div>
+  </form>
+</section>

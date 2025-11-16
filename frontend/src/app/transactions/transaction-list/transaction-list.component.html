@@ -1,9 +1,17 @@
 <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Transactions</h1>
-      <p class="mt-2 text-sm text-gray-600">View and manage all your financial transactions</p>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Transactions</h1>
+        <p class="mt-2 text-sm text-gray-600">View and manage all your financial transactions</p>
+      </div>
+      <a
+        routerLink="/transactions/new"
+        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow"
+      >
+        Add Transaction
+      </a>
     </div>
 
     <!-- Loading State -->
@@ -48,12 +56,12 @@
       <h3 class="mt-4 text-lg font-medium text-gray-900">No transactions yet</h3>
       <p class="mt-2 text-sm text-gray-500">Get started by adding your first transaction.</p>
       <div class="mt-6">
-        <button
-          type="button"
+        <a
+          routerLink="/transactions/new"
           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Add Your First Transaction
-        </button>
+        </a>
       </div>
     </div>
 

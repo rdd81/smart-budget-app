@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { TransactionService } from '../../services/transaction.service';
 import { Transaction, TransactionType } from '../../models/transaction.model';
 import { Page } from '../../models/pagination.model';
@@ -7,7 +8,7 @@ import { Page } from '../../models/pagination.model';
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './transaction-list.component.html',
   styleUrl: './transaction-list.component.css',
 })

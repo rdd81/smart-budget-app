@@ -171,4 +171,45 @@ describe('TransactionService', () => {
       req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
     });
   });
+
+  describe('createTransaction', () => {
+    it('should post payload to create new transaction', () => {
+      const payload = {
+        amount: 99.99,
+        transactionDate: '2025-02-01',
+        description: 'New expense',
+        categoryId: 'cat-123',
+        transactionType: TransactionType.EXPENSE
+      };
+
+      service.createTransaction(payload).subscribe(response => {
+        expect(response).toEqual(mockTransaction);
+      });
+
+      const req = httpMock.expectOne(apiUrl);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(payload);
+      req.flush(mockTransaction);
+    });
+
+    it('should propagate API errors on create', () => {
+      const payload = {
+        amount: 10,
+        transactionDate: '2025-02-01',
+        description: 'Failing tx',
+        categoryId: 'cat-456',
+        transactionType: TransactionType.INCOME
+      };
+
+      service.createTransaction(payload).subscribe({
+        next: () => fail('should have failed'),
+        error: error => {
+          expect(error.status).toBe(400);
+        }
+      });
+
+      const req = httpMock.expectOne(apiUrl);
+      req.flush('Validation error', { status: 400, statusText: 'Bad Request' });
+    });
+  });
 });
