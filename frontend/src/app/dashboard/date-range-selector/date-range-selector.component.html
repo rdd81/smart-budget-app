@@ -1,0 +1,32 @@
+<section class="range-selector">
+  <div class="preset-grid">
+    <button
+      type="button"
+      *ngFor="let preset of presets"
+      [class.active]="selectedPreset === preset.key"
+      (click)="selectPreset(preset.key)"
+    >
+      {{ preset.label }}
+    </button>
+  </div>
+
+  <div *ngIf="selectedPreset === 'CUSTOM'" class="custom-range">
+    <div class="range-inputs">
+      <label>
+        Start
+        <input type="date" [(ngModel)]="customRange.start" />
+      </label>
+      <label>
+        End
+        <input type="date" [(ngModel)]="customRange.end" />
+      </label>
+    </div>
+    <button class="apply-button" (click)="applyCustomRange()">Apply Range</button>
+  </div>
+
+  <p *ngIf="activeRange" class="range-summary">
+    Showing: <strong>{{ activeRange.start | date: 'MMM d, y' }} - {{ activeRange.end | date: 'MMM d, y' }}</strong>
+  </p>
+
+  <p *ngIf="error" class="error-text">{{ error }}</p>
+</section>

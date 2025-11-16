@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../models/user.model';
 import { AnalyticsService } from '../services/analytics.service';
@@ -9,13 +8,15 @@ import { CategoryBreakdownComponent } from './category-breakdown/category-breakd
 import { ExpensePieChartComponent } from './expense-pie-chart/expense-pie-chart.component';
 import { SpendingTrendsChartComponent } from './spending-trends-chart/spending-trends-chart.component';
 import { MonthComparisonComponent } from './month-comparison/month-comparison.component';
+import { DateRangeSelectorComponent } from './date-range-selector/date-range-selector.component';
+import { DateRange } from '../models/date-range.model';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    DateRangeSelectorComponent,
     CategoryBreakdownComponent,
     ExpensePieChartComponent,
     SpendingTrendsChartComponent,
@@ -32,75 +33,25 @@ export class DashboardComponent implements OnInit {
   summary: SummaryResponse | null = null;
   loading = false;
   error: string | null = null;
-  selectedMonthKey = '';
-  isCustomRange = false;
-  customRange = {
-    start: '',
-    end: ''
-  };
-
-  monthOptions = this.buildMonthOptions();
+  selectedRange: DateRange | null = null;
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    this.selectedMonthKey = this.monthOptions[0].key;
-    this.fetchSummary(this.monthOptions[0].start, this.monthOptions[0].end);
   }
 
   onLogout(): void {
     this.authService.logout();
   }
 
-  private buildMonthOptions() {
-    const options = [];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const start = new Date(date.getFullYear(), date.getMonth(), 1);
-      const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-      options.push({
-        key: `month-${i}`,
-        label: start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        start: start.toISOString().split('T')[0],
-        end: end.toISOString().split('T')[0]
-      });
-    }
-    options.push({
-      key: 'custom',
-      label: 'Custom Range',
-      start: '',
-      end: ''
-    });
-    return options;
-  }
-
-  onMonthChange(key: string): void {
-    this.error = null;
-    this.selectedMonthKey = key;
-    this.isCustomRange = key === 'custom';
-
-    if (!this.isCustomRange) {
-      const option = this.monthOptions.find(opt => opt.key === key);
-      if (option) {
-        this.fetchSummary(option.start, option.end);
-      }
-    } else {
-      this.summary = null;
+  retryFetch(): void {
+    if (this.selectedRange) {
+      this.fetchSummary(this.selectedRange.start, this.selectedRange.end);
     }
   }
 
-  applyCustomRange(): void {
-    if (!this.customRange.start || !this.customRange.end) {
-      this.error = 'Please select both start and end dates.';
-      return;
-    }
-
-    if (new Date(this.customRange.start) > new Date(this.customRange.end)) {
-      this.error = 'End date cannot be before start date.';
-      return;
-    }
-
-    this.fetchSummary(this.customRange.start, this.customRange.end);
+  onRangeChange(range: DateRange): void {
+    this.selectedRange = range;
+    this.fetchSummary(range.start, range.end);
   }
 
   private fetchSummary(start: string, end: string): void {

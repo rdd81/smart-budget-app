@@ -8,43 +8,13 @@
   </header>
 
   <section class="dashboard-content">
-    <div class="filter-card">
-      <div class="filter-header">
-        <div>
-          <p class="filter-title">Monthly summary</p>
-          <p class="filter-subtitle">Select a month or custom range to refresh insights.</p>
-        </div>
-        <select
-          class="select-control"
-          [ngModel]="selectedMonthKey"
-          (ngModelChange)="onMonthChange($event)"
-        >
-          <option *ngFor="let option of monthOptions" [value]="option.key">
-            {{ option.label }}
-          </option>
-        </select>
-      </div>
-
-      <div *ngIf="isCustomRange" class="custom-range">
-        <div class="range-inputs">
-          <label>
-            Start date
-            <input type="date" [(ngModel)]="customRange.start" />
-          </label>
-          <label>
-            End date
-            <input type="date" [(ngModel)]="customRange.end" />
-          </label>
-        </div>
-        <button class="ghost-button" (click)="applyCustomRange()">Apply Range</button>
-      </div>
-    </div>
+    <app-date-range-selector (rangeChange)="onRangeChange($event)"></app-date-range-selector>
 
     <div *ngIf="error" class="alert error">
       <div>
         {{ error }}
       </div>
-      <button class="ghost-button" (click)="selectedMonthKey === 'custom' ? applyCustomRange() : onMonthChange(selectedMonthKey)">
+      <button class="ghost-button" (click)="retryFetch()">
         Retry
       </button>
     </div>

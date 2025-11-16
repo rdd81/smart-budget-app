@@ -43,47 +43,32 @@ describe('DashboardComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should load summary on init', () => {
+  it('should fetch summary when range changes', () => {
     fixture.detectChanges();
+    analyticsService.getSummary.calls.reset();
+
+    component.onRangeChange({ start: '2025-03-01', end: '2025-03-31' });
 
     expect(component.summary).toEqual(mockSummary);
-    expect(analyticsService.getSummary).toHaveBeenCalled();
-  });
-
-  it('should refetch when month changes', () => {
-    fixture.detectChanges();
-    analyticsService.getSummary.calls.reset();
-    const secondOption = component.monthOptions[1];
-
-    component.onMonthChange(secondOption.key);
-
-    expect(component.selectedMonthKey).toBe(secondOption.key);
     expect(analyticsService.getSummary).toHaveBeenCalledWith({
-      startDate: secondOption.start,
-      endDate: secondOption.end
-    });
-  });
-
-  it('should handle custom range apply', () => {
-    fixture.detectChanges();
-    component.onMonthChange('custom');
-    analyticsService.getSummary.calls.reset();
-
-    component.customRange.start = '2025-02-01';
-    component.customRange.end = '2025-02-28';
-    component.applyCustomRange();
-
-    expect(analyticsService.getSummary).toHaveBeenCalledWith({
-      startDate: '2025-02-01',
-      endDate: '2025-02-28'
+      startDate: '2025-03-01',
+      endDate: '2025-03-31'
     });
   });
 
   it('should show error message when service fails', () => {
     analyticsService.getSummary.and.returnValue(throwError(() => new Error('fail')));
-    fixture.detectChanges();
+    component.onRangeChange({ start: '2025-02-01', end: '2025-02-28' });
 
     expect(component.error).toBe('Failed to load analytics. Please try again.');
     expect(component.summary).toBeNull();
+  });
+
+  it('should retry fetching summary', () => {
+    fixture.detectChanges();
+    component.onRangeChange({ start: '2025-01-01', end: '2025-01-31' });
+    analyticsService.getSummary.calls.reset();
+    component.retryFetch();
+    expect(analyticsService.getSummary).toHaveBeenCalled();
   });
 });
