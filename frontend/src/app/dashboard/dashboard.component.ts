@@ -6,11 +6,12 @@ import { User } from '../models/user.model';
 import { AnalyticsService } from '../services/analytics.service';
 import { SummaryResponse } from '../models/analytics.model';
 import { CategoryBreakdownComponent } from './category-breakdown/category-breakdown.component';
+import { ExpensePieChartComponent } from './expense-pie-chart/expense-pie-chart.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CategoryBreakdownComponent],
+  imports: [CommonModule, FormsModule, CategoryBreakdownComponent, ExpensePieChartComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })

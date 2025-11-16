@@ -1,0 +1,59 @@
+<section class="chart-card">
+  <header class="chart-header">
+    <div>
+      <h3>Expense Breakdown by Category</h3>
+      <p>Visual overview of your spending distribution.</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert error">{{ error }}</div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <span>Loading chart...</span>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="hasData; else emptyState" class="chart-layout">
+      <div class="chart-wrapper">
+        <svg viewBox="0 0 36 36" class="pie">
+          <circle class="pie-background" cx="18" cy="18" r="15.9155"></circle>
+          <ng-container *ngFor="let segment of segments">
+            <circle
+              class="pie-segment"
+              cx="18"
+              cy="18"
+              r="15.9155"
+              [attr.stroke]="segment.color"
+              [attr.stroke-dasharray]="segment.dasharray"
+              [attr.stroke-dashoffset]="segment.dashoffset"
+            >
+              <title>{{ segment.categoryName }}: {{ formatCurrency(segment.totalAmount) }} ({{ segment.percentage | number: '1.0-1' }}%)</title>
+            </circle>
+          </ng-container>
+        </svg>
+        <div class="chart-total">
+          <p>Total</p>
+          <strong>{{ formatCurrency(totalAmount) }}</strong>
+        </div>
+      </div>
+
+      <ul class="legend">
+        <li *ngFor="let segment of segments">
+          <span class="legend-color" [style.background]="segment.color"></span>
+          <div class="legend-text">
+            <p>{{ segment.categoryName }}</p>
+            <small>{{ formatCurrency(segment.totalAmount) }} • {{ segment.percentage | number: '1.0-1' }}%</small>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h4>No expense data available</h4>
+      <p>Add expense transactions to visualize your spending.</p>
+    </div>
+  </ng-template>
+</section>

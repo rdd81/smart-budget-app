@@ -103,10 +103,16 @@
       </p>
     </div>
 
-    <app-category-breakdown
-      *ngIf="summary"
-      [startDate]="summary.startDate"
-      [endDate]="summary.endDate"
-    ></app-category-breakdown>
+    <div class="grid-layout" *ngIf="summary">
+      <app-category-breakdown
+        [startDate]="summary.startDate"
+        [endDate]="summary.endDate"
+      ></app-category-breakdown>
+
+      <app-expense-pie-chart
+        [startDate]="summary.startDate"
+        [endDate]="summary.endDate"
+      ></app-expense-pie-chart>
+    </div>
   </section>
 </div>
