@@ -174,10 +174,10 @@ smart-budget-app/
 │   │   │   │           ├── DateUtil.java
 │   │   │   │           └── ValidationUtil.java
 │   │   │   └── resources/
-│   │   │       ├── application.yml                  # Main configuration
-│   │   │       ├── application-dev.yml              # Development config
-│   │   │       ├── application-staging.yml          # Staging config
-│   │   │       ├── application-prod.yml             # Production config
+│   │   │       ├── application.properties                  # Main configuration
+│   │   │       ├── application-dev.properties              # Development config
+│   │   │       ├── application-staging.properties          # Staging config
+│   │   │       ├── application-prod.properties             # Production config
 │   │   │       ├── db/migration/                    # Flyway migrations
 │   │   │       │   ├── V1__initial_schema.sql       # Initial tables
 │   │   │       │   ├── V2__seed_categories.sql      # Seed category data
@@ -379,7 +379,7 @@ These files are **automatically loaded** by dev agents (configured in `.bmad-cor
 | JWT Token Handling | `core/interceptors/auth.interceptor.ts` | `security/JwtTokenProvider.java`, `security/JwtAuthenticationFilter.java` |
 | Error Handling | `core/interceptors/error.interceptor.ts` | `exception/GlobalExceptionHandler.java` |
 | Database Migrations | N/A | `resources/db/migration/V*.sql` |
-| Configuration | `environments/*.ts` | `resources/application*.yml` |
+| Configuration | `environments/*.ts` | `resources/application*.properties` |
 
 ---
 

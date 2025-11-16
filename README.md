@@ -369,11 +369,56 @@ JAR file will be created in `backend/build/libs/`
 **Completed Stories:**
 - ✅ Story 1.1: Project Initialization and Repository Structure
 - ✅ Story 1.2: Docker Containerization and Local Development Environment
+- ✅ Story 1.3: Database Schema and Migration Framework
+- ✅ Story 1.4: CI/CD Pipeline Setup
+- ✅ Story 1.5: User Registration Backend API
+- ✅ Story 1.6: User Login and JWT Authentication
+- ✅ Story 1.7: Frontend Authentication UI and State Management
+- 🔨 Story 1.8: Deployment Configuration and Documentation (In Progress)
 
 **Upcoming Stories:**
-- Story 1.3: Database Schema and Migration Framework
-- Story 1.4: CI/CD Pipeline Setup
-- Story 1.5-1.9: User Authentication and Profile Management
+- Story 1.9: User Profile Management
+
+## Environment Configuration
+
+The application supports multiple deployment environments (development, staging, production) with environment-specific configurations.
+
+### Required Environment Variables
+
+```bash
+# Application Profile
+SPRING_PROFILES_ACTIVE=dev|staging|prod
+
+# Database Connection
+DATABASE_URL=jdbc:postgresql://hostname:5432/database_name
+DATABASE_USERNAME=your_db_username
+DATABASE_PASSWORD=your_db_password
+
+# JWT Configuration
+JWT_SECRET=your-256-bit-secret-key-minimum-32-characters-long
+
+# CORS Configuration
+ALLOWED_ORIGINS=http://localhost:4200
+```
+
+For detailed deployment instructions, see [docs/architecture/deployment.md](docs/architecture/deployment.md).
+
+### Health Check Endpoint
+
+Monitor application health:
+
+```bash
+# Check backend health
+curl http://localhost:8080/api/health
+
+# Expected response (healthy):
+{
+  "status": "UP",
+  "timestamp": "2025-11-16T10:30:00Z",
+  "version": "1.0.0",
+  "database": "UP"
+}
+```
 
 ## Documentation
 
@@ -381,6 +426,9 @@ For detailed documentation, see the `docs/` directory:
 
 - **Product Requirements:** [docs/prd/](docs/prd/)
 - **Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Technology Stack:** [docs/architecture/tech-stack.md](docs/architecture/tech-stack.md)
+- **Project Structure:** [docs/architecture/source-tree.md](docs/architecture/source-tree.md)
+- **Deployment Guide:** [docs/architecture/deployment.md](docs/architecture/deployment.md)
 - **Sprint Artifacts:** [docs/sprint-artifacts/](docs/sprint-artifacts/)
 - **Tech Specifications:** [docs/sprint-artifacts/tech-spec-epic-1.md](docs/sprint-artifacts/tech-spec-epic-1.md)
 
