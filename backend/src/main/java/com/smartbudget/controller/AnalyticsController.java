@@ -2,6 +2,7 @@ package com.smartbudget.controller;
 
 import com.smartbudget.dto.CategoryBreakdownResponse;
 import com.smartbudget.dto.SummaryResponse;
+import com.smartbudget.dto.TrendDataPoint;
 import com.smartbudget.entity.TransactionType;
 import com.smartbudget.service.AnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,8 +71,21 @@ public class AnalyticsController {
         return ResponseEntity.ok(
                 allBreakdown.stream()
                         .filter(response -> response.getTransactionType() == transactionType)
-                        .toList()
+                .toList()
         );
+    }
+
+    @GetMapping("/trends")
+    @Operation(summary = "Get income vs expenses trends", description = "Returns aggregated totals grouped by day/week/month.")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TrendDataPoint.class))))
+    public ResponseEntity<List<TrendDataPoint>> getTrends(
+            Authentication authentication,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "MONTH") String groupBy) {
+        UUID userId = extractUserId(authentication);
+        List<TrendDataPoint> response = analyticsService.getTrends(userId, startDate, endDate, groupBy);
+        return ResponseEntity.ok(response);
     }
 
     private UUID extractUserId(Authentication authentication) {

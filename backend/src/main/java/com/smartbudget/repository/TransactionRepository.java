@@ -4,6 +4,7 @@ import com.smartbudget.entity.Transaction;
 import com.smartbudget.entity.TransactionType;
 import com.smartbudget.repository.projection.CategoryBreakdownView;
 import com.smartbudget.repository.projection.TransactionSummaryView;
+import com.smartbudget.repository.projection.TrendAggregationView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -109,4 +110,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             ORDER BY totalAmount DESC
             """)
     List<CategoryBreakdownView> getCategoryBreakdown(UUID userId, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Aggregates totals by date.
+     */
+    @Query("""
+            SELECT t.transactionDate AS period,
+                   SUM(CASE WHEN t.transactionType = com.smartbudget.entity.TransactionType.INCOME THEN t.amount ELSE 0 END) AS income,
+                   SUM(CASE WHEN t.transactionType = com.smartbudget.entity.TransactionType.EXPENSE THEN t.amount ELSE 0 END) AS expenses,
+                   COUNT(t) AS transactionCount
+            FROM Transaction t
+            WHERE t.user.id = :userId
+              AND t.transactionDate BETWEEN :startDate AND :endDate
+            GROUP BY t.transactionDate
+            """)
+    List<TrendAggregationView> aggregateDaily(UUID userId, LocalDate startDate, LocalDate endDate);
 }

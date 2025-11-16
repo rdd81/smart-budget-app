@@ -1,5 +1,6 @@
 package com.smartbudget.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartbudget.entity.Category;
 import com.smartbudget.entity.CategoryType;
 import com.smartbudget.entity.Transaction;
@@ -65,6 +66,8 @@ class AnalyticsControllerIntegrationTest {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private User user;
     private String token;
@@ -117,6 +120,23 @@ class AnalyticsControllerIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[?(@.transactionType=='EXPENSE')].transactionCount").value(List.of(2)))
                 .andExpect(jsonPath("$[?(@.transactionType=='INCOME')].totalAmount").value(List.of(400.0)));
+    }
+
+    @Test
+    void trendsEndpoint_ShouldReturnZeroFilledSeries() throws Exception {
+        createTransaction(expenseCategory, TransactionType.EXPENSE, new BigDecimal("100"), LocalDate.of(2025, 1, 1));
+        createTransaction(incomeCategory, TransactionType.INCOME, new BigDecimal("200"), LocalDate.of(2025, 1, 3));
+
+        mockMvc.perform(get("/api/analytics/trends")
+                        .param("startDate", "2025-01-01")
+                        .param("endDate", "2025-01-03")
+                        .param("groupBy", "DAY")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].totalExpenses").value(100.0))
+                .andExpect(jsonPath("$[1].totalIncome").value(0.0))
+                .andExpect(jsonPath("$[2].totalIncome").value(200.0));
     }
 
     private Transaction createTransaction(Category category, TransactionType type, BigDecimal amount, LocalDate date) {

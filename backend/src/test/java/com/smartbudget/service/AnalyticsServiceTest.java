@@ -2,10 +2,12 @@ package com.smartbudget.service;
 
 import com.smartbudget.dto.CategoryBreakdownResponse;
 import com.smartbudget.dto.SummaryResponse;
+import com.smartbudget.dto.TrendDataPoint;
 import com.smartbudget.entity.TransactionType;
 import com.smartbudget.repository.TransactionRepository;
 import com.smartbudget.repository.projection.CategoryBreakdownView;
 import com.smartbudget.repository.projection.TransactionSummaryView;
+import com.smartbudget.repository.projection.TrendAggregationView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -149,5 +151,43 @@ class AnalyticsServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(incomeResponse.getPercentage()).isEqualTo(100.0);
+    }
+
+    @Test
+    void getTrends_ShouldReturnZeroFilledPeriods() {
+        TrendAggregationView day1 = new TrendAggregationView() {
+            @Override
+            public LocalDate getPeriod() {
+                return LocalDate.of(2025, 1, 1);
+            }
+
+            @Override
+            public BigDecimal getIncome() {
+                return new BigDecimal("200");
+            }
+
+            @Override
+            public BigDecimal getExpenses() {
+                return new BigDecimal("100");
+            }
+
+            @Override
+            public long getTransactionCount() {
+                return 2;
+            }
+        };
+
+        when(transactionRepository.aggregateDaily(any(), any(), any()))
+                .thenReturn(List.of(day1));
+
+        List<TrendDataPoint> points = analyticsService.getTrends(
+                userId,
+                LocalDate.of(2025, 1, 1),
+                LocalDate.of(2025, 1, 3),
+                "DAY");
+
+        assertThat(points).hasSize(3);
+        assertThat(points.get(0).getTotalIncome()).isEqualByComparingTo("200");
+        assertThat(points.get(1).getTotalIncome()).isZero();
     }
 }
