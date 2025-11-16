@@ -1,5 +1,7 @@
 package com.smartbudget.controller;
 
+import com.smartbudget.dto.AuthResponse;
+import com.smartbudget.dto.LoginRequest;
 import com.smartbudget.dto.RegisterRequest;
 import com.smartbudget.dto.UserResponse;
 import com.smartbudget.exception.ErrorResponse;
@@ -61,5 +63,39 @@ public class AuthController {
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         UserResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Login user and generate JWT token.
+     *
+     * @param request Login request with email and password
+     * @return AuthResponse with JWT token and user details
+     */
+    @PostMapping("/login")
+    @Operation(
+            summary = "Login user",
+            description = "Authenticate user credentials and generate JWT access token valid for 24 hours."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Login successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AuthResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid credentials",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }
