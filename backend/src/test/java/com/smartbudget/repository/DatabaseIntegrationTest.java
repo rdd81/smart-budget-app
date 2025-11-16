@@ -1,11 +1,14 @@
 package com.smartbudget.repository;
 
 import com.smartbudget.entity.*;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -46,6 +49,11 @@ class DatabaseIntegrationTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @BeforeAll
+    static void ensureDockerAvailable() {
+        Assumptions.assumeTrue(isDockerAvailable(), "Docker is required for Testcontainers-based tests.");
+    }
 
     @Test
     void testPostgreSQLContainerIsRunning() {
@@ -235,5 +243,14 @@ class DatabaseIntegrationTest {
         // Verify transactions were cascaded deleted
         userTransactions = transactionRepository.findByUserId(user.getId());
         assertThat(userTransactions).isEmpty();
+    }
+
+    private static boolean isDockerAvailable() {
+        try {
+            DockerClientFactory.instance().client();
+            return true;
+        } catch (Throwable throwable) {
+            return false;
+        }
     }
 }

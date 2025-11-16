@@ -5,6 +5,8 @@ import com.smartbudget.dto.LoginRequest;
 import com.smartbudget.entity.User;
 import com.smartbudget.repository.UserRepository;
 import com.smartbudget.service.JwtService;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -65,6 +68,11 @@ class AuthControllerLoginIntegrationTest {
 
     private User testUser;
     private final String testPassword = "password123";
+
+    @BeforeAll
+    static void ensureDockerAvailable() {
+        Assumptions.assumeTrue(isDockerAvailable(), "Docker is required for Testcontainers-based tests.");
+    }
 
     @BeforeEach
     void setUp() {
@@ -249,5 +257,14 @@ class AuthControllerLoginIntegrationTest {
         mockMvc.perform(get("/api/users/profile")
                         .header("Authorization", "Bearer invalid.token.here"))
                 .andExpect(status().isUnauthorized()); // 401 Unauthorized
+    }
+
+    private static boolean isDockerAvailable() {
+        try {
+            DockerClientFactory.instance().client();
+            return true;
+        } catch (Throwable throwable) {
+            return false;
+        }
     }
 }

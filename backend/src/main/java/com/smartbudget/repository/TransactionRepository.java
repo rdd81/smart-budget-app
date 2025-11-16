@@ -2,6 +2,8 @@ package com.smartbudget.repository;
 
 import com.smartbudget.entity.Transaction;
 import com.smartbudget.entity.TransactionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -55,6 +57,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @return a list of transactions in the specified category
      */
     List<Transaction> findByUserIdAndCategoryId(UUID userId, UUID categoryId);
+
+    /**
+     * Paged retrieval of transactions for a user.
+     *
+     * @param userId the user ID
+     * @param pageable pagination and sorting information
+     * @return page of transactions
+     */
+    Page<Transaction> findByUserId(UUID userId, Pageable pageable);
 
     /**
      * Get total income for a user within a date range.
