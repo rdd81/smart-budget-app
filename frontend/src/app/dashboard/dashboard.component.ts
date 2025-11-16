@@ -5,11 +5,12 @@ import { AuthService } from '../auth/auth.service';
 import { User } from '../models/user.model';
 import { AnalyticsService } from '../services/analytics.service';
 import { SummaryResponse } from '../models/analytics.model';
+import { CategoryBreakdownComponent } from './category-breakdown/category-breakdown.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CategoryBreakdownComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })

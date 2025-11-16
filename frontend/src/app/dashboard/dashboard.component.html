@@ -102,5 +102,11 @@
         </strong>
       </p>
     </div>
+
+    <app-category-breakdown
+      *ngIf="summary"
+      [startDate]="summary.startDate"
+      [endDate]="summary.endDate"
+    ></app-category-breakdown>
   </section>
 </div>

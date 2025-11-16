@@ -2,13 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AnalyticsService } from './analytics.service';
 import { environment } from '../../environments/environment';
-import { SummaryResponse } from '../models/analytics.model';
+import { CategoryBreakdownResponse, SummaryResponse } from '../models/analytics.model';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
   let httpMock: HttpTestingController;
 
   const apiUrl = `${environment.apiUrl}/analytics/summary`;
+  const breakdownUrl = `${environment.apiUrl}/analytics/category-breakdown`;
   const mockSummary: SummaryResponse = {
     totalIncome: 1000,
     totalExpenses: 400,
@@ -17,6 +18,17 @@ describe('AnalyticsService', () => {
     startDate: '2025-01-01',
     endDate: '2025-01-31'
   };
+
+  const mockBreakdown: CategoryBreakdownResponse[] = [
+    {
+      categoryId: 'cat-1',
+      categoryName: 'Salary',
+      transactionType: 'INCOME',
+      totalAmount: 800,
+      transactionCount: 2,
+      percentage: 70
+    }
+  ];
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -50,5 +62,19 @@ describe('AnalyticsService', () => {
     );
     expect(req.request.method).toBe('GET');
     req.flush(mockSummary);
+  });
+
+  it('should fetch category breakdown with params', () => {
+    service.getCategoryBreakdown({ startDate: '2025-01-01', transactionType: 'EXPENSE' }).subscribe((data) => {
+      expect(data).toEqual(mockBreakdown);
+    });
+
+    const req = httpMock.expectOne(request =>
+      request.url === breakdownUrl &&
+      request.params.get('startDate') === '2025-01-01' &&
+      request.params.get('transactionType') === 'EXPENSE'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockBreakdown);
   });
 });

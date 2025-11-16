@@ -1,0 +1,176 @@
+.breakdown-section {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.breakdown-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.breakdown-header p {
+  margin: 0.2rem 0 0;
+  color: #64748b;
+}
+
+.alert.error {
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #475569;
+}
+
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  animation: spin 0.65s linear infinite;
+}
+
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.breakdown-card {
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 0.85rem 1.25rem;
+  color: white;
+}
+
+.card-header.income {
+  background: linear-gradient(120deg, #22c55e, #16a34a);
+}
+
+.card-header.expense {
+  background: linear-gradient(120deg, #ef4444, #dc2626);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+thead th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.category-name {
+  margin: 0;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.transaction-count {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.amount {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.percentage-cell {
+  min-width: 150px;
+}
+
+.progress-bar {
+  background: #f1f5f9;
+  border-radius: 999px;
+  height: 8px;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.progress {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.progress.income {
+  background: #22c55e;
+}
+
+.progress.expense {
+  background: #ef4444;
+}
+
+.action-cell button {
+  border: none;
+  background: #f1f5f9;
+  color: #4f46e5;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-state {
+  text-align: center;
+  color: #64748b;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  th,
+  td {
+    font-size: 0.85rem;
+  }
+
+  .percentage-cell {
+    min-width: auto;
+  }
+}
