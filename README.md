@@ -4,6 +4,23 @@
 
 A modern personal finance management application that helps users track income and expenses, visualize spending patterns, and make informed financial decisions.
 
+## Quick Start (Local)
+
+Backend (Spring Boot 3.4, Java 21)
+1) `cd backend`
+2) `./gradlew bootRun` (or `gradlew.bat bootRun` on Windows)
+3) API base: `http://localhost:8080/api` (health: `/api/health`)
+
+Frontend (Angular 20, Node 20)
+1) `cd frontend`
+2) `npm install`
+3) `npm start`
+4) UI: `http://localhost:4200`
+
+Usage
+- Run backend and frontend in separate terminals.
+- Use the UI to register/login, add/edit transactions, and view categorization/analytics.
+
 ## Technology Stack
 
 ### Frontend
