@@ -84,6 +84,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Allow registration and login
                         .requestMatchers("/api/categories/**").permitAll() // Categories are public
+                        .requestMatchers("/api/categorization/**").permitAll() // Suggestions are public
                         .requestMatchers("/api/health").permitAll() // Allow health check
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Allow Swagger
                         .requestMatchers("/api/**").authenticated() // Require authentication for all other API endpoints
