@@ -128,6 +128,23 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     List<TrendAggregationView> aggregateDaily(UUID userId, LocalDate startDate, LocalDate endDate);
 
     /**
+     * Fetch transactions eligible for bulk categorization according to filters.
+     */
+    @Query("""
+            SELECT t FROM Transaction t
+            WHERE t.user.id = :userId
+              AND (:transactionType IS NULL OR t.transactionType = :transactionType)
+              AND (:dateFrom IS NULL OR t.transactionDate >= :dateFrom)
+              AND (:dateTo IS NULL OR t.transactionDate <= :dateTo)
+              AND (:categoryId IS NULL OR t.category.id = :categoryId)
+            """)
+    List<Transaction> findForBulkCategorization(UUID userId,
+                                                TransactionType transactionType,
+                                                LocalDate dateFrom,
+                                                LocalDate dateTo,
+                                                UUID categoryId);
+
+    /**
      * Total income for a user within a date range.
      */
     @Query("""
@@ -150,4 +167,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
               AND t.transactionDate BETWEEN :startDate AND :endDate
             """)
     BigDecimal getTotalExpensesByUserAndDateRange(UUID userId, LocalDate startDate, LocalDate endDate);
+
 }

@@ -2,8 +2,11 @@ package com.smartbudget.controller;
 
 import com.smartbudget.dto.TransactionRequest;
 import com.smartbudget.dto.TransactionResponse;
+import com.smartbudget.dto.BulkCategorizationRequest;
+import com.smartbudget.dto.BulkCategorizationJobStatus;
 import com.smartbudget.entity.TransactionType;
 import com.smartbudget.exception.ErrorResponse;
+import com.smartbudget.service.BulkCategorizationService;
 import com.smartbudget.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,9 +37,12 @@ import java.util.UUID;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final BulkCategorizationService bulkCategorizationService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService,
+                                 BulkCategorizationService bulkCategorizationService) {
         this.transactionService = transactionService;
+        this.bulkCategorizationService = bulkCategorizationService;
     }
 
     @GetMapping
@@ -103,6 +109,26 @@ public class TransactionController {
         UUID userId = extractUserId(authentication);
         TransactionResponse response = transactionService.createTransaction(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/bulk-categorize")
+    @Operation(summary = "Bulk auto-categorize transactions", description = "Starts an asynchronous job to apply suggested categories in bulk for the authenticated user.")
+    public ResponseEntity<BulkCategorizationJobStatus> bulkCategorize(
+            Authentication authentication,
+            @Valid @RequestBody BulkCategorizationRequest request) {
+        UUID userId = extractUserId(authentication);
+        BulkCategorizationJobStatus status = bulkCategorizationService.startJob(userId, request);
+        return ResponseEntity.ok(status);
+    }
+
+    @GetMapping("/bulk-categorize/{jobId}")
+    @Operation(summary = "Bulk categorization job status", description = "Returns status and summary of a bulk categorization job.")
+    public ResponseEntity<BulkCategorizationJobStatus> getBulkJobStatus(@PathVariable UUID jobId) {
+        BulkCategorizationJobStatus status = bulkCategorizationService.getJob(jobId);
+        if (status == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(status);
     }
 
     @PutMapping("/{id}")
