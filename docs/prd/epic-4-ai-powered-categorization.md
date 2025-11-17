@@ -32,7 +32,7 @@ so that the frontend can request suggestions during transaction entry.
 
 1. POST /api/categorization/suggest endpoint created accepting request body: description (required), amount (optional), transactionType (INCOME/EXPENSE, required)
 2. Endpoint calls CategorizationService.suggestCategory() and returns CategorySuggestionResponse: categoryId, categoryName, confidence
-3. Endpoint returns 200 OK with suggestion even if confidence is low (frontend decides whether to display)
+3. Endpoint returns 200 OK with suggestion even if confidence is low (frontend decides whether to display)ю
 4. If no suggestion available, returns 200 with null category or default "Other" category
 5. Endpoint does not require authentication for MVP (suggestions are based on generic rules, not user-specific) - ALTERNATIVE: require auth for consistency
 6. Request validation: description cannot be empty, transactionType must be valid enum

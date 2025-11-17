@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, combineLatest, debounceTime, distinctUntilChanged, of, switchMap, takeUntil, tap, catchError, startWith } from 'rxjs';
 import { TransactionService } from '../../services/transaction.service';
 import { CategoryService } from '../../services/category.service';
 import { Category, Transaction, TransactionRequest, TransactionType } from '../../models/transaction.model';
+import { CategorizationService } from '../../services/categorization.service';
+import { CategorySuggestion } from '../../models/categorization.model';
 
 @Component({
   selector: 'app-add-transaction',
@@ -18,10 +20,12 @@ export class AddTransactionComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly transactionService = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
+  private readonly categorizationService = inject(CategorizationService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
   readonly TransactionType = TransactionType;
+  readonly SUGGESTION_CONFIDENCE_THRESHOLD = 0.6;
 
   form = this.fb.group({
     amount: ['', [Validators.required, Validators.min(0.01)]],
@@ -38,12 +42,16 @@ export class AddTransactionComponent implements OnInit, OnDestroy {
   submitError: string | null = null;
   successMessage: string | null = null;
   submitInProgress = false;
+  suggestion: CategorySuggestion | null = null;
+  suggestionLoading = false;
+  suggestionError: string | null = null;
 
   ngOnInit(): void {
     this.fetchCategories();
     this.form.controls.transactionType.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.applyCategoryFilter());
+    this.setupSuggestionListener();
   }
 
   ngOnDestroy(): void {
@@ -136,6 +144,12 @@ export class AddTransactionComponent implements OnInit, OnDestroy {
     this.fetchCategories();
   }
 
+  acceptSuggestion(): void {
+    if (this.suggestion?.categoryId) {
+      this.form.controls.categoryId.setValue(this.suggestion.categoryId);
+    }
+  }
+
   private resetForm(transactionType: TransactionType | null): void {
     const nextType = transactionType ?? this.form.controls.transactionType.value ?? TransactionType.EXPENSE;
     this.form.reset({
@@ -147,5 +161,54 @@ export class AddTransactionComponent implements OnInit, OnDestroy {
     });
     this.applyCategoryFilter();
     this.form.markAsPristine();
+  }
+
+  private setupSuggestionListener(): void {
+    const description$ = this.form.controls.description.valueChanges.pipe(
+      startWith(this.form.controls.description.value ?? '')
+    );
+    const amount$ = this.form.controls.amount.valueChanges.pipe(
+      startWith(this.form.controls.amount.value ?? '')
+    );
+    const type$ = this.form.controls.transactionType.valueChanges.pipe(
+      startWith(this.form.controls.transactionType.value ?? TransactionType.EXPENSE)
+    );
+
+    combineLatest([description$, amount$, type$])
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        tap(() => {
+          this.suggestionError = null;
+        }),
+        switchMap(([description, amount, transactionType]) => {
+          const trimmedDescription = (description ?? '').trim();
+          if (!trimmedDescription || !transactionType) {
+            this.suggestion = null;
+            this.suggestionLoading = false;
+            return of(null);
+          }
+          this.suggestionLoading = true;
+          return this.categorizationService.suggestCategory({
+            description: trimmedDescription,
+            amount: amount ? Number(amount) : undefined,
+            transactionType
+          }).pipe(
+            catchError(() => {
+              this.suggestionError = 'Unable to fetch suggestion right now.';
+              return of(null);
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(suggestion => {
+        this.suggestionLoading = false;
+        if (suggestion && suggestion.confidence >= this.SUGGESTION_CONFIDENCE_THRESHOLD) {
+          this.suggestion = suggestion;
+        } else {
+          this.suggestion = null;
+        }
+      });
   }
 }

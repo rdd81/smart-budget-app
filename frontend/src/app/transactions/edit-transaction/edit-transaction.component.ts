@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, catchError, combineLatest, debounceTime, distinctUntilChanged, of, startWith, switchMap, takeUntil, tap } from 'rxjs';
 import { TransactionService } from '../../services/transaction.service';
 import { CategoryService } from '../../services/category.service';
 import { Category, Transaction, TransactionRequest, TransactionType } from '../../models/transaction.model';
+import { CategorizationService } from '../../services/categorization.service';
+import { CategorySuggestion } from '../../models/categorization.model';
 
 @Component({
   selector: 'app-edit-transaction',
@@ -18,12 +20,14 @@ export class EditTransactionComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly transactionService = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
+  private readonly categorizationService = inject(CategorizationService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
   readonly TransactionType = TransactionType;
   readonly transactionId = this.route.snapshot.paramMap.get('id') ?? '';
+  readonly SUGGESTION_CONFIDENCE_THRESHOLD = 0.6;
 
   loadingTransaction = true;
   loadingCategories = true;
@@ -35,6 +39,9 @@ export class EditTransactionComponent implements OnInit, OnDestroy {
 
   categories: Category[] = [];
   filteredCategories: Category[] = [];
+  suggestion: CategorySuggestion | null = null;
+  suggestionLoading = false;
+  suggestionError: string | null = null;
 
   form = this.fb.group({
     amount: ['', [Validators.required, Validators.min(0.01)]],
@@ -57,6 +64,7 @@ export class EditTransactionComponent implements OnInit, OnDestroy {
 
     this.fetchCategories();
     this.fetchTransaction();
+    this.setupSuggestionListener();
   }
 
   ngOnDestroy(): void {
@@ -170,5 +178,58 @@ export class EditTransactionComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.router.navigate(['/transactions']);
+  }
+
+  acceptSuggestion(): void {
+    if (this.suggestion?.categoryId) {
+      this.form.controls.categoryId.setValue(this.suggestion.categoryId);
+    }
+  }
+
+  private setupSuggestionListener(): void {
+    const description$ = this.form.controls.description.valueChanges.pipe(
+      startWith(this.form.controls.description.value ?? '')
+    );
+    const amount$ = this.form.controls.amount.valueChanges.pipe(
+      startWith(this.form.controls.amount.value ?? '')
+    );
+    const type$ = this.form.controls.transactionType.valueChanges.pipe(
+      startWith(this.form.controls.transactionType.value ?? TransactionType.EXPENSE)
+    );
+
+    combineLatest([description$, amount$, type$])
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        tap(() => this.suggestionError = null),
+        switchMap(([description, amount, transactionType]) => {
+          const trimmedDescription = (description ?? '').trim();
+          if (!trimmedDescription || !transactionType) {
+            this.suggestion = null;
+            this.suggestionLoading = false;
+            return of(null);
+          }
+          this.suggestionLoading = true;
+          return this.categorizationService.suggestCategory({
+            description: trimmedDescription,
+            amount: amount ? Number(amount) : undefined,
+            transactionType
+          }).pipe(
+            catchError(() => {
+              this.suggestionError = 'Unable to fetch suggestion right now.';
+              return of(null);
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(suggestion => {
+        this.suggestionLoading = false;
+        if (suggestion && suggestion.confidence >= this.SUGGESTION_CONFIDENCE_THRESHOLD) {
+          this.suggestion = suggestion;
+        } else {
+          this.suggestion = null;
+        }
+      });
   }
 }

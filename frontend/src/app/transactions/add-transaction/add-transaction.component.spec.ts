@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AddTransactionComponent } from './add-transaction.component';
@@ -6,6 +6,8 @@ import { CategoryService } from '../../services/category.service';
 import { TransactionService } from '../../services/transaction.service';
 import { Category, Transaction, TransactionType } from '../../models/transaction.model';
 import { HttpErrorResponse } from '@angular/common/http';
+import { CategorizationService } from '../../services/categorization.service';
+import { CategorySuggestion } from '../../models/categorization.model';
 
 class CategoryServiceMock {
   categories: Category[] = [
@@ -24,22 +26,31 @@ class TransactionServiceMock {
   } as unknown as Transaction));
 }
 
+class CategorizationServiceMock {
+  suggestCategory = jasmine.createSpy('suggestCategory').and.returnValue(
+    of({ categoryId: 'cat-expense', categoryName: 'Food', confidence: 0.9 } as CategorySuggestion)
+  );
+}
+
 describe('AddTransactionComponent', () => {
   let component: AddTransactionComponent;
   let fixture: ComponentFixture<AddTransactionComponent>;
   let transactionService: TransactionServiceMock;
   let categoryService: CategoryServiceMock;
+  let categorizationService: CategorizationServiceMock;
 
   beforeEach(async () => {
     transactionService = new TransactionServiceMock();
     categoryService = new CategoryServiceMock();
+    categorizationService = new CategorizationServiceMock();
 
     await TestBed.configureTestingModule({
       imports: [AddTransactionComponent],
       providers: [
         provideRouter([]),
         { provide: TransactionService, useValue: transactionService },
-        { provide: CategoryService, useValue: categoryService }
+        { provide: CategoryService, useValue: categoryService },
+        { provide: CategorizationService, useValue: categorizationService }
       ]
     }).compileComponents();
 
@@ -104,4 +115,23 @@ describe('AddTransactionComponent', () => {
 
     expect(component.submitError).toBeTruthy();
   });
+
+  it('should request category suggestion when description changes', fakeAsync(() => {
+    component.form.controls.description.setValue('Starbucks latte');
+    tick(600);
+    fixture.detectChanges();
+
+    expect(categorizationService.suggestCategory).toHaveBeenCalled();
+    expect(component.suggestion?.categoryName).toBe('Food');
+  }));
+
+  it('should hide suggestion when confidence is below threshold', fakeAsync(() => {
+    categorizationService.suggestCategory.and.returnValue(of({ categoryId: 'cat-expense', categoryName: 'Food', confidence: 0.2 }));
+
+    component.form.controls.description.setValue('Low confidence');
+    tick(600);
+    fixture.detectChanges();
+
+    expect(component.suggestion).toBeNull();
+  }));
 });

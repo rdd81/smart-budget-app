@@ -128,6 +128,26 @@
         <small *ngIf="hasError('categoryId', 'required')" class="error-message">
           Category is required.
         </small>
+        <div class="suggestion" *ngIf="suggestion || suggestionLoading || suggestionError">
+          <div class="suggestion-header">
+            <span>Suggested category</span>
+            <span *ngIf="suggestion" class="confidence">Confidence: {{ suggestion.confidence | number:'1.0-2' }}</span>
+          </div>
+          <div *ngIf="suggestionLoading" class="suggestion-loading">
+            <span class="spinner inline" aria-hidden="true"></span> Checking description...
+          </div>
+          <div *ngIf="suggestionError" class="suggestion-error">
+            {{ suggestionError }}
+          </div>
+          <div *ngIf="suggestion && !suggestionLoading && !suggestionError" class="suggestion-body">
+            <div class="suggestion-text">
+              Suggested: <strong>{{ suggestion.categoryName }}</strong>
+            </div>
+            <button type="button" class="ghost-button small" (click)="acceptSuggestion()">
+              Use suggestion
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
