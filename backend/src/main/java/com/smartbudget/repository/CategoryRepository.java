@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -30,4 +31,12 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * @return a list of categories with the specified name
      */
     List<Category> findByName(String name);
+
+    /**
+     * Find the first category by name ignoring case.
+     *
+     * @param name the category name
+     * @return optional category result
+     */
+    Optional<Category> findFirstByNameIgnoreCase(String name);
 }

@@ -5,8 +5,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.smartbudget.repository.CategoryRepository;
+import com.smartbudget.repository.CategorizationRuleRepository;
 import com.smartbudget.repository.TransactionRepository;
 import com.smartbudget.repository.UserRepository;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 
 import javax.sql.DataSource;
 
@@ -30,7 +32,13 @@ class SmartBudgetAppApplicationTests {
 	private TransactionRepository transactionRepository;
 
 	@MockBean
+	private CategorizationRuleRepository categorizationRuleRepository;
+
+	@MockBean
 	private DataSource dataSource;
+
+	@MockBean
+	private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
 	@Test
 	void contextLoads() {

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -125,4 +126,28 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             GROUP BY t.transactionDate
             """)
     List<TrendAggregationView> aggregateDaily(UUID userId, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Total income for a user within a date range.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+              AND t.transactionType = com.smartbudget.entity.TransactionType.INCOME
+              AND t.transactionDate BETWEEN :startDate AND :endDate
+            """)
+    BigDecimal getTotalIncomeByUserAndDateRange(UUID userId, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Total expenses for a user within a date range.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+              AND t.transactionType = com.smartbudget.entity.TransactionType.EXPENSE
+              AND t.transactionDate BETWEEN :startDate AND :endDate
+            """)
+    BigDecimal getTotalExpensesByUserAndDateRange(UUID userId, LocalDate startDate, LocalDate endDate);
 }
