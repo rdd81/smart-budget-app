@@ -12,6 +12,7 @@ import com.smartbudget.exception.ResourceNotFoundException;
 import com.smartbudget.repository.CategoryRepository;
 import com.smartbudget.repository.TransactionRepository;
 import com.smartbudget.repository.UserRepository;
+import com.smartbudget.service.FeedbackService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,9 @@ class TransactionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private FeedbackService feedbackService;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -169,6 +173,24 @@ class TransactionServiceTest {
         assertThat(response.getAmount()).isEqualByComparingTo(request.getAmount());
         assertThat(response.getCategory().getId()).isEqualTo(category.getId());
         verify(transactionRepository).save(any(Transaction.class));
+    }
+
+    @Test
+    void createTransaction_ShouldRecordFeedbackWhenSuggestionDiffers() {
+        UUID suggestedId = UUID.randomUUID();
+        Category suggested = new Category();
+        suggested.setId(suggestedId);
+        suggested.setName("Suggested");
+
+        request.setSuggestedCategoryId(suggestedId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(categoryRepository.findById(request.getCategoryId())).thenReturn(Optional.of(category));
+        when(categoryRepository.findById(suggestedId)).thenReturn(Optional.of(suggested));
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+
+        transactionService.createTransaction(userId, request);
+
+        verify(feedbackService).recordFeedback(eq(user), eq(request.getDescription()), eq(suggested), eq(category), any(Transaction.class));
     }
 
     @Test

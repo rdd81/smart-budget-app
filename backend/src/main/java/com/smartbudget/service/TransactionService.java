@@ -11,6 +11,7 @@ import com.smartbudget.exception.ResourceNotFoundException;
 import com.smartbudget.repository.CategoryRepository;
 import com.smartbudget.repository.TransactionRepository;
 import com.smartbudget.repository.UserRepository;
+import com.smartbudget.service.FeedbackService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,13 +36,16 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final FeedbackService feedbackService;
 
     public TransactionService(TransactionRepository transactionRepository,
                               CategoryRepository categoryRepository,
-                              UserRepository userRepository) {
+                              UserRepository userRepository,
+                              FeedbackService feedbackService) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
+        this.feedbackService = feedbackService;
     }
 
     /**
@@ -96,6 +100,7 @@ public class TransactionService {
         applyRequest(transaction, request, category);
 
         Transaction saved = transactionRepository.save(transaction);
+        maybeRecordFeedback(user, request, category, saved);
         return mapToResponse(saved);
     }
 
@@ -111,6 +116,7 @@ public class TransactionService {
 
         applyRequest(transaction, request, category);
         Transaction saved = transactionRepository.save(transaction);
+        maybeRecordFeedback(transaction.getUser(), request, category, saved);
         return mapToResponse(saved);
     }
 
@@ -129,6 +135,14 @@ public class TransactionService {
         transaction.setDescription(request.getDescription());
         transaction.setCategory(category);
         transaction.setTransactionType(request.getTransactionType());
+    }
+
+    private void maybeRecordFeedback(User user, TransactionRequest request, Category actualCategory, Transaction transaction) {
+        if (request.getSuggestedCategoryId() == null) {
+            return;
+        }
+        Category suggested = categoryRepository.findById(request.getSuggestedCategoryId()).orElse(null);
+        feedbackService.recordFeedback(user, request.getDescription(), suggested, actualCategory, transaction);
     }
 
     private Transaction fetchOwnedTransaction(UUID transactionId, UUID userId) {

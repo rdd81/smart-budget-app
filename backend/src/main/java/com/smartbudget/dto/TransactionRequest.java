@@ -41,6 +41,12 @@ public class TransactionRequest {
     @Schema(description = "Type of the transaction", example = "EXPENSE")
     private TransactionType transactionType;
 
+    /**
+     * Optional suggested category identifier from the client, used for feedback tracking.
+     */
+    @Schema(description = "Suggested category id (for feedback tracking)", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private UUID suggestedCategoryId;
+
     public BigDecimal getAmount() {
         return amount;
     }
@@ -79,5 +85,13 @@ public class TransactionRequest {
 
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
+    }
+
+    public UUID getSuggestedCategoryId() {
+        return suggestedCategoryId;
+    }
+
+    public void setSuggestedCategoryId(UUID suggestedCategoryId) {
+        this.suggestedCategoryId = suggestedCategoryId;
     }
 }
