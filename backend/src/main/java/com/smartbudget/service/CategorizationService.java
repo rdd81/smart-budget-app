@@ -6,6 +6,8 @@ import com.smartbudget.entity.Category;
 import com.smartbudget.entity.TransactionType;
 import com.smartbudget.repository.CategorizationRuleRepository;
 import com.smartbudget.repository.CategoryRepository;
+import com.smartbudget.repository.CategorizationFeedbackRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -25,17 +28,22 @@ public class CategorizationService {
     static final double PARTIAL_MATCH_CONFIDENCE = 0.6;
     static final double AMOUNT_HEURISTIC_CONFIDENCE = 0.4;
     static final double MIN_CONFIDENCE_THRESHOLD = 0.3;
+    static final double PERSONALIZED_CONFIDENCE = 0.95;
+    static final long PERSONALIZATION_THRESHOLD = 3L;
 
     private static final BigDecimal LARGE_TRANSACTION_THRESHOLD = BigDecimal.valueOf(1000);
     private static final BigDecimal SMALL_TRANSACTION_THRESHOLD = BigDecimal.TEN;
 
     private final CategorizationRuleRepository ruleRepository;
     private final CategoryRepository categoryRepository;
+    private final CategorizationFeedbackRepository feedbackRepository;
 
     public CategorizationService(CategorizationRuleRepository ruleRepository,
-                                 CategoryRepository categoryRepository) {
+                                 CategoryRepository categoryRepository,
+                                 CategorizationFeedbackRepository feedbackRepository) {
         this.ruleRepository = ruleRepository;
         this.categoryRepository = categoryRepository;
+        this.feedbackRepository = feedbackRepository;
     }
 
     /**
@@ -45,11 +53,25 @@ public class CategorizationService {
     public CategorySuggestion suggestCategory(String description,
                                               BigDecimal amount,
                                               TransactionType transactionType) {
+        return suggestCategory(description, amount, transactionType, null);
+    }
+
+    /**
+     * Suggest a category for the provided description/amount combination with optional personalization.
+     */
+    @Transactional(readOnly = true)
+    public CategorySuggestion suggestCategory(String description,
+                                              BigDecimal amount,
+                                              TransactionType transactionType,
+                                              UUID userId) {
         if (transactionType == null) {
             return null;
         }
 
         Candidate bestCandidate = null;
+
+        Candidate personalized = findPersonalizedCandidate(description, userId);
+        bestCandidate = pickBetter(bestCandidate, personalized);
 
         String normalizedDescription = description == null ? "" : description.trim();
         String normalizedLower = normalizedDescription.toLowerCase(Locale.ENGLISH);
@@ -126,6 +148,43 @@ public class CategorizationService {
     private Optional<Candidate> materializeHeuristicCategory(String categoryName) {
         return categoryRepository.findFirstByNameIgnoreCase(categoryName)
                 .map(category -> new Candidate(category, AMOUNT_HEURISTIC_CONFIDENCE));
+    }
+
+    private Candidate findPersonalizedCandidate(String description, UUID userId) {
+        if (userId == null) {
+            return null;
+        }
+        String token = extractToken(description);
+        if (token.isBlank()) {
+            return null;
+        }
+        Category category = getPersonalizedCategory(userId, token);
+        if (category == null) {
+            return null;
+        }
+        return new Candidate(category, PERSONALIZED_CONFIDENCE);
+    }
+
+    @Cacheable(value = "categorizationPersonalized", key = "T(String).format('%s:%s', #userId, #token)", unless = "#result == null")
+    protected Category getPersonalizedCategory(UUID userId, String token) {
+        return feedbackRepository.findTopCategoriesForUserAndToken(userId, token).stream()
+                .filter(entry -> entry.getCorrectionCount() != null && entry.getCorrectionCount() >= PERSONALIZATION_THRESHOLD)
+                .map(entry -> entry.getCategory())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String extractToken(String description) {
+        if (description == null) {
+            return "";
+        }
+        String[] parts = description.toLowerCase(Locale.ENGLISH).split("\\s+");
+        for (String part : parts) {
+            if (part.length() >= 3) {
+                return part;
+            }
+        }
+        return description.trim().toLowerCase(Locale.ENGLISH);
     }
 
     private boolean containsWholeWord(String text, String keyword) {

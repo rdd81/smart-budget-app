@@ -7,6 +7,8 @@ import com.smartbudget.entity.CategoryType;
 import com.smartbudget.entity.TransactionType;
 import com.smartbudget.repository.CategorizationRuleRepository;
 import com.smartbudget.repository.CategoryRepository;
+import com.smartbudget.repository.CategorizationFeedbackRepository;
+import com.smartbudget.repository.projection.FeedbackCategoryCount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,9 @@ class CategorizationServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private CategorizationFeedbackRepository feedbackRepository;
 
     @InjectMocks
     private CategorizationService categorizationService;
@@ -120,6 +125,30 @@ class CategorizationServiceTest {
         assertThat(suggestion).isNotNull();
         assertThat(suggestion.getCategoryId()).isEqualTo(food.getId());
         assertThat(suggestion.getConfidence()).isEqualTo(CategorizationService.AMOUNT_HEURISTIC_CONFIDENCE);
+    }
+
+    @Test
+    void suggestCategory_PersonalizedLearningShouldOverride() {
+        UUID userId = UUID.randomUUID();
+        FeedbackCategoryCount projection = new FeedbackCategoryCount() {
+            @Override
+            public Category getCategory() {
+                return rent;
+            }
+
+            @Override
+            public Long getCorrectionCount() {
+                return 4L;
+            }
+        };
+        when(feedbackRepository.findTopCategoriesForUserAndToken(userId, "rent")).thenReturn(List.of(projection));
+
+        CategorySuggestion suggestion = categorizationService.suggestCategory(
+                "Rent bill from landlord", BigDecimal.valueOf(200), TransactionType.EXPENSE, userId);
+
+        assertThat(suggestion).isNotNull();
+        assertThat(suggestion.getCategoryId()).isEqualTo(rent.getId());
+        assertThat(suggestion.getConfidence()).isEqualTo(CategorizationService.PERSONALIZED_CONFIDENCE);
     }
 
     private Category createCategory(String name, CategoryType type) {

@@ -52,7 +52,7 @@ class CategorizationControllerTest {
     @Test
     void suggestCategory_ShouldReturnSuggestion() throws Exception {
         UUID categoryId = UUID.randomUUID();
-        Mockito.when(categorizationService.suggestCategory(any(), any(), eq(TransactionType.EXPENSE)))
+        Mockito.when(categorizationService.suggestCategory(any(), any(), eq(TransactionType.EXPENSE), any()))
                 .thenReturn(new CategorySuggestion(categoryId, "Food", 0.9));
 
         CategorySuggestionRequest request = new CategorySuggestionRequest();
@@ -71,7 +71,7 @@ class CategorizationControllerTest {
 
     @Test
     void suggestCategory_NoSuggestion_ShouldReturnNullFields() throws Exception {
-        Mockito.when(categorizationService.suggestCategory(any(), any(), eq(TransactionType.EXPENSE)))
+        Mockito.when(categorizationService.suggestCategory(any(), any(), eq(TransactionType.EXPENSE), any()))
                 .thenReturn(null);
 
         CategorySuggestionRequest request = new CategorySuggestionRequest();

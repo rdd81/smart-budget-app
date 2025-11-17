@@ -53,7 +53,8 @@ public class CategorizationController {
         CategorySuggestion suggestion = categorizationService.suggestCategory(
                 request.getDescription(),
                 request.getAmount(),
-                request.getTransactionType());
+                request.getTransactionType(),
+                request.getUserId());
 
         return ResponseEntity.ok(CategorySuggestionResponse.fromSuggestion(suggestion));
     }
