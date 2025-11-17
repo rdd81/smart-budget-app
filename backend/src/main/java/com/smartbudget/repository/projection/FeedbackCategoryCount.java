@@ -7,4 +7,3 @@ public interface FeedbackCategoryCount {
 
     Long getCorrectionCount();
 }
-

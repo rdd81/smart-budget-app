@@ -55,16 +55,8 @@ class FeedbackServiceTest {
     }
 
     @Test
-    void recordFeedback_ShouldSkipWhenSameCategory() {
-        actual.setId(suggested.getId());
-        feedbackService.recordFeedback(user, "desc", suggested, actual, transaction);
-        verify(feedbackRepository, never()).save(org.mockito.Mockito.any());
-    }
-
-    @Test
     void recordFeedback_ShouldSkipWhenMissingUser() {
         feedbackService.recordFeedback(null, "desc", suggested, actual, transaction);
         verify(feedbackRepository, never()).save(org.mockito.Mockito.any());
     }
 }
-

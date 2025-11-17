@@ -35,12 +35,6 @@ public class FeedbackService {
         if (user == null || transaction == null || actualCategory == null) {
             return;
         }
-        if (suggestedCategory != null && suggestedCategory.getId() != null
-                && actualCategory.getId() != null
-                && suggestedCategory.getId().equals(actualCategory.getId())) {
-            return; // no feedback needed when suggestion equals chosen
-        }
-
         CategorizationFeedback feedback = new CategorizationFeedback();
         feedback.setUser(user);
         feedback.setDescription(description);
@@ -50,4 +44,3 @@ public class FeedbackService {
         feedbackRepository.save(feedback);
     }
 }
-
